@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+allowBuilds:
+  esbuild: true
+# Skips pnpm's registry-based supply-chain policy verification for this lockfile.
+trustLockfile: true

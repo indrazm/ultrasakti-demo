@@ -1,0 +1,21 @@
+{
+  "name": "@ultrasakti/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "with-env": "dotenv -e ../../.env --",
+    "dev": "pnpm with-env tsx watch src/index.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "latest",
+    "@hono/zod-validator": "latest",
+    "hono": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

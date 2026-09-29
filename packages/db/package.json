@@ -1,0 +1,26 @@
+{
+  "name": "@ultrasakti/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "with-env": "dotenv -e ../../.env --",
+    "generate": "pnpm with-env prisma generate",
+    "migrate:dev": "pnpm with-env prisma migrate dev",
+    "migrate:deploy": "pnpm with-env prisma migrate deploy",
+    "studio": "pnpm with-env prisma studio"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "pg": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "prisma": "^7.0.0",
+    "typescript": "latest"
+  }
+}

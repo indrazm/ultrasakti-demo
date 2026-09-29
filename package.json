@@ -1,0 +1,23 @@
+{
+  "name": "training-ultra-sakti",
+  "private": true,
+  "packageManager": "pnpm@12.4.2",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @ultrasakti/api --filter @ultrasakti/platform dev",
+    "dev:api": "pnpm --filter @ultrasakti/api dev",
+    "dev:platform": "pnpm --filter @ultrasakti/platform dev",
+    "dev:admin": "pnpm --filter @ultrasakti/admin dev",
+    "build": "pnpm -r build",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker-compose.dev.yml down",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
+  },
+  "devDependencies": {
+    "dotenv-cli": "latest",
+    "oxfmt": "latest",
+    "oxlint": "latest"
+  }
+}

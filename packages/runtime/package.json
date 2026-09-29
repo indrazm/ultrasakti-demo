@@ -7,10 +7,12 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval:basic": "node --env-file=../../.env src/evals/run-basics.ts"
   },
   "dependencies": {
     "@anvia/core": "^1.5.0",
+    "@anvia/lens": "^1.2.0",
     "@anvia/openai": "^1.1.7",
     "exa-js": "^2.23.0",
     "zod": "^4.6.5"

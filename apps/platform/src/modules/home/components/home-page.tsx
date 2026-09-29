@@ -1,11 +1,26 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { ArrowUp, Menu, MessageSquare, Plus, Search, Sparkles, X } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@ultrasakti/ui/components/avatar'
+import { ArrowUp, Menu, Sparkles } from 'lucide-react'
+import { Bubble, BubbleContent } from '@ultrasakti/ui/components/bubble'
 import { Button } from '@ultrasakti/ui/components/button'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@ultrasakti/ui/components/empty'
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+  MessageHeader,
+} from '@ultrasakti/ui/components/message'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@ultrasakti/ui/components/sheet'
 import { Textarea } from '@ultrasakti/ui/components/textarea'
+import { ChatSidebar } from './chat-sidebar'
 
-type Message = { id: number; role: 'assistant' | 'user'; content: string }
-type Conversation = { id: number; title: string; messages: Message[] }
+type ChatMessage = { id: number; role: 'assistant' | 'user'; content: string }
+type Conversation = { id: number; title: string; messages: ChatMessage[] }
 
 const initialConversations: Conversation[] = [
   {
@@ -105,7 +120,7 @@ export function HomePage() {
     if (!content) return
 
     const id = nextId.current++
-    const message: Message = { id, role: 'user', content }
+    const message: ChatMessage = { id, role: 'user', content }
     if (activeConversation) {
       setConversations((current) =>
         current.map((conversation) =>
@@ -115,10 +130,7 @@ export function HomePage() {
         ),
       )
     } else {
-      setConversations((current) => [
-        { id, title: content.slice(0, 36).trimEnd(), messages: [message] },
-        ...current,
-      ])
+      setConversations((current) => [{ id, title: content, messages: [message] }, ...current])
       setActiveId(id)
     }
     setDraft('')
@@ -126,107 +138,44 @@ export function HomePage() {
 
   return (
     <main className="flex h-dvh min-h-[420px] overflow-hidden bg-[#f8f8f6] text-[#242725]">
-      {sidebarOpen && (
-        <button
-          aria-label="Close sidebar overlay"
-          className="fixed inset-0 z-20 bg-black/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
       <aside
         aria-label="Chat sidebar"
-        className={`fixed inset-y-0 left-0 z-30 flex w-[272px] flex-col border-r border-[#e9e9e5] bg-[#f3f3f0] transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className="hidden w-[272px] shrink-0 border-r border-[#e9e9e5] lg:block"
       >
-        <div className="flex items-center justify-between px-4 pb-5 pt-5">
-          <div className="flex items-center gap-2.5 px-1">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-[#d7e6d7] text-[#356747]">
-              <Sparkles size={17} />
-            </span>
-            <span className="text-[17px] font-semibold tracking-tight">atelier</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Close sidebar"
-            className="lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X size={18} />
-          </Button>
-        </div>
-        <div className="space-y-1 px-3">
-          <Button
-            variant="ghost"
-            className="h-10 w-full justify-start gap-3 px-3 hover:bg-[#e9eae5]"
-            onClick={() => selectChat(null)}
-          >
-            <Plus size={18} /> New chat
-          </Button>
-          <Button
-            variant="ghost"
-            className="h-10 w-full justify-start gap-3 px-3 hover:bg-[#e9eae5]"
-            onClick={() => setSearchOpen((open) => !open)}
-          >
-            <Search size={18} /> Search chats
-          </Button>
-          {searchOpen && (
-            <input
-              autoFocus
-              aria-label="Search conversations"
-              className="h-9 w-full rounded-lg border border-[#dedfd9] bg-white px-3 text-sm outline-none focus:border-[#7b9d82]"
-              placeholder="Search conversations"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-          )}
-        </div>
-        <nav aria-label="Conversations" className="mt-9 min-h-0 flex-1 overflow-y-auto px-3">
-          <p className="px-3 pb-2 text-xs font-semibold text-[#8b908b]">Recent</p>
-          <div className="space-y-0.5">
-            {visibleConversations.map((conversation) => (
-              <Button
-                key={conversation.id}
-                variant="ghost"
-                aria-current={conversation.id === activeId ? 'page' : undefined}
-                className={`h-10 w-full justify-start overflow-hidden px-3 text-left text-sm font-normal hover:bg-[#e9eae5] ${conversation.id === activeId ? 'bg-[#e5e9e1] font-medium' : ''}`}
-                onClick={() => selectChat(conversation.id)}
-              >
-                <MessageSquare size={16} className="mr-1.5 text-[#888e88]" />
-                <span className="truncate">{conversation.title}</span>
-              </Button>
-            ))}
-            {visibleConversations.length === 0 && (
-              <p className="px-3 py-2 text-sm text-[#8b908b]">No matching chats</p>
-            )}
-          </div>
-        </nav>
-        <div className="border-t border-[#e6e7e2] p-3">
-          <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-            <Avatar className="size-9">
-              <AvatarFallback className="bg-[#e5ddd1] text-xs font-semibold text-[#6d5d4a]">
-                DU
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-semibold">Demo User</p>
-              <p className="text-xs text-[#888e88]">Personal workspace</p>
-            </div>
-          </div>
-        </div>
+        <ChatSidebar
+          conversations={visibleConversations}
+          activeId={activeId}
+          searchOpen={searchOpen}
+          search={search}
+          onSearchOpenChange={setSearchOpen}
+          onSearchChange={setSearch}
+          onSelect={selectChat}
+        />
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col bg-[#fcfcfb]">
         <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-[#f0f0ec] px-5 lg:px-9">
           <div className="flex min-w-0 items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Open sidebar"
-              className="-ml-2 lg:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu size={19} />
-            </Button>
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger
+                aria-label="Open sidebar"
+                render={<Button variant="ghost" size="icon" className="-ml-2 lg:hidden" />}
+              >
+                <Menu size={19} />
+              </SheetTrigger>
+              <SheetContent side="left" className="gap-0 p-0 [&]:w-[272px] lg:hidden">
+                <SheetTitle className="sr-only">Chats</SheetTitle>
+                <ChatSidebar
+                  conversations={visibleConversations}
+                  activeId={activeId}
+                  searchOpen={searchOpen}
+                  search={search}
+                  onSearchOpenChange={setSearchOpen}
+                  onSearchChange={setSearch}
+                  onSelect={selectChat}
+                />
+              </SheetContent>
+            </Sheet>
             <h1 className="truncate text-sm font-semibold text-[#464b46]">
               {activeConversation?.title ?? 'New chat'}
             </h1>
@@ -247,37 +196,47 @@ export function HomePage() {
                 </div>
                 {activeConversation.messages.map((message) =>
                   message.role === 'user' ? (
-                    <div key={message.id} className="flex justify-end">
-                      <p className="max-w-[80%] rounded-[20px] rounded-br-md bg-[#e9eee7] px-5 py-3.5 text-[15px] leading-6 text-[#303b32]">
-                        {message.content}
-                      </p>
-                    </div>
+                    <Message key={message.id} align="end">
+                      <MessageContent>
+                        <Bubble align="end" variant="secondary" className="max-w-[80%]">
+                          <BubbleContent className="rounded-[20px] rounded-br-md bg-[#e9eee7] px-5 py-3.5 text-[15px] leading-6 text-[#303b32]">
+                            {message.content}
+                          </BubbleContent>
+                        </Bubble>
+                      </MessageContent>
+                    </Message>
                   ) : (
-                    <div key={message.id} className="flex items-start gap-3.5">
-                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#dce9dd] text-[#477452]">
+                    <Message key={message.id}>
+                      <MessageAvatar className="mt-0.5 size-8 self-start rounded-xl bg-[#dce9dd] text-[#477452]">
                         <Sparkles size={17} />
-                      </span>
-                      <div className="max-w-[650px] space-y-2 pt-0.5">
-                        <p className="text-sm font-semibold">Atelier</p>
-                        <p className="whitespace-pre-wrap text-[15px] leading-[1.75] text-[#4d534e]">
-                          {message.content}
-                        </p>
-                      </div>
-                    </div>
+                      </MessageAvatar>
+                      <MessageContent className="max-w-[650px] gap-2 pt-0.5">
+                        <MessageHeader className="px-0 text-sm font-semibold text-[#242725]">
+                          Atelier
+                        </MessageHeader>
+                        <Bubble variant="ghost">
+                          <BubbleContent className="whitespace-pre-wrap text-[15px] leading-[1.75] text-[#4d534e]">
+                            {message.content}
+                          </BubbleContent>
+                        </Bubble>
+                      </MessageContent>
+                    </Message>
                   ),
                 )}
               </div>
             ) : (
-              <div className="flex flex-1 flex-col items-center justify-center pb-10 text-center">
-                <span className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-[#dce9dd] text-[#477452]">
-                  <Sparkles size={27} />
-                </span>
-                <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                  What can I help you with?
-                </h2>
-                <p className="mt-3 text-sm text-[#8a908b]">
-                  A quiet place to think, write, and explore.
-                </p>
+              <Empty className="pb-10">
+                <EmptyHeader className="gap-3">
+                  <EmptyMedia className="mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#dce9dd] text-[#477452]">
+                    <Sparkles size={27} />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-3xl font-semibold sm:text-4xl">
+                    <h2>What can I help you with?</h2>
+                  </EmptyTitle>
+                  <EmptyDescription className="text-[#8a908b]">
+                    A quiet place to think, write, and explore.
+                  </EmptyDescription>
+                </EmptyHeader>
                 <div className="mt-10 grid w-full max-w-[580px] grid-cols-1 gap-3 text-left sm:grid-cols-2">
                   {suggestions.map(([title, detail]) => (
                     <button
@@ -290,7 +249,7 @@ export function HomePage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </Empty>
             )}
           </div>
         </div>

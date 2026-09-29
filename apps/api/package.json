@@ -11,9 +11,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@anvia/client": "^1.2.0",
+    "@anvia/server": "^1.1.4",
     "@hono/node-server": "latest",
     "@hono/zod-validator": "latest",
     "@ultrasakti/db": "workspace:*",
+    "@ultrasakti/runtime": "workspace:*",
     "better-auth": "^1.7.6",
     "hono": "latest",
     "zod": "latest"

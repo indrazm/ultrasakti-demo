@@ -25,7 +25,7 @@ export default defineConfig({
     {
       name: 'platform',
       testMatch: '**/platform.spec.ts',
-      use: { ...baseUse, baseURL: 'http://127.0.0.1:4174' },
+      use: { ...baseUse, baseURL: 'http://localhost:4174' },
     },
   ],
   webServer: [
@@ -37,7 +37,13 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @ultrasakti/platform e2e:serve',
-      url: 'http://127.0.0.1:4174',
+      url: 'http://localhost:4174',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: 'PLATFORM_ORIGIN=http://localhost:4174 pnpm --filter @ultrasakti/api dev',
+      url: 'http://localhost:3000/api/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

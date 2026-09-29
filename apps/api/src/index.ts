@@ -1,9 +1,14 @@
 import { serve } from '@hono/node-server'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { z } from 'zod'
+import { auth, platformOrigin } from './modules/auth/auth'
 
 export const app = new Hono()
+
+app.use('/api/auth/*', cors({ origin: platformOrigin, credentials: true }))
+app.all('/api/auth/*', (c) => auth.handler(c.req.raw))
 
 app.get('/api/health', (c) => c.json({ status: 'ok' }))
 

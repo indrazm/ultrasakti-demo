@@ -5,6 +5,7 @@ import { Button } from '@ultrasakti/ui/components/button'
 type ConversationItem = { id: number; title: string }
 
 type ChatSidebarProps = {
+  user: { name: string; email: string }
   conversations: ConversationItem[]
   activeId: number | null
   searchOpen: boolean
@@ -15,6 +16,7 @@ type ChatSidebarProps = {
 }
 
 export function ChatSidebar({
+  user,
   conversations,
   activeId,
   searchOpen,
@@ -80,12 +82,12 @@ export function ChatSidebar({
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
           <Avatar className="size-9">
             <AvatarFallback className="bg-[#e5ddd1] text-xs font-semibold text-[#6d5d4a]">
-              DU
+              {user.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-semibold">Demo User</p>
-            <p className="text-xs text-[#888e88]">Personal workspace</p>
+            <p className="text-sm font-semibold">{user.name}</p>
+            <p className="max-w-[180px] truncate text-xs text-[#888e88]">{user.email}</p>
           </div>
         </div>
       </div>

@@ -1,296 +1,205 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { ArrowUp, Menu, Sparkles } from 'lucide-react'
-import { Bubble, BubbleContent } from '@ultrasakti/ui/components/bubble'
+import { useState, type FormEvent } from 'react'
 import { Button } from '@ultrasakti/ui/components/button'
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@ultrasakti/ui/components/empty'
-import {
-  Message,
-  MessageAvatar,
-  MessageContent,
-  MessageHeader,
-} from '@ultrasakti/ui/components/message'
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@ultrasakti/ui/components/sheet'
-import { Textarea } from '@ultrasakti/ui/components/textarea'
-import { ChatSidebar } from './chat-sidebar'
-
-type ChatMessage = { id: number; role: 'assistant' | 'user'; content: string }
-type Conversation = { id: number; title: string; messages: ChatMessage[] }
-
-const initialConversations: Conversation[] = [
-  {
-    id: 1,
-    title: 'Planning a product launch',
-    messages: [
-      {
-        id: 1,
-        role: 'user',
-        content: 'Help me plan a thoughtful launch for our new workspace app.',
-      },
-      {
-        id: 2,
-        role: 'assistant',
-        content:
-          'Absolutely. A strong launch starts with a clear story: who the app is for, what changes for them, and why now. I’d organize the work into three phases: prepare, launch, and learn.',
-      },
-      { id: 3, role: 'user', content: 'What should we focus on in the first two weeks?' },
-      {
-        id: 4,
-        role: 'assistant',
-        content:
-          'Start with the essentials. Define one primary audience, write a simple positioning statement, and choose the few channels where that audience already spends time. Then make a small list of early users who can give honest feedback before launch day.',
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Ideas for a team offsite',
-    messages: [
-      {
-        id: 5,
-        role: 'user',
-        content: 'Can you suggest a few activities for a small team offsite?',
-      },
-      {
-        id: 6,
-        role: 'assistant',
-        content:
-          'Try a mix of reflection and play: a short retrospective, a collaborative cooking session, and an unstructured walk in pairs. Leave enough open time for conversations that do not fit on an agenda.',
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: 'Writing a better brief',
-    messages: [
-      { id: 7, role: 'user', content: 'What makes a useful creative brief?' },
-      {
-        id: 8,
-        role: 'assistant',
-        content:
-          'A useful brief gives the team a clear goal, audience, constraints, and definition of success. Keep it short enough that someone can understand the assignment in one reading.',
-      },
-    ],
-  },
-]
-
-const suggestions = [
-  ['Make a plan', 'for a project I have in mind'],
-  ['Write something', 'clear, warm, and useful'],
-  ['Explore ideas', 'for my next big thing'],
-  ['Learn a concept', 'one step at a time'],
-]
+import { Input } from '@ultrasakti/ui/components/input'
+import { Label } from '@ultrasakti/ui/components/label'
+import { authClient } from '../../auth/api/auth-client'
+import { ChatPage } from './chat-page'
 
 export function HomePage() {
-  const [conversations, setConversations] = useState(initialConversations)
-  const [activeId, setActiveId] = useState<number | null>(1)
-  const [draft, setDraft] = useState('')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [search, setSearch] = useState('')
-  const nextId = useRef(9)
-  const messagesViewport = useRef<HTMLDivElement>(null)
-  const activeConversation = conversations.find((conversation) => conversation.id === activeId)
-  const visibleConversations = conversations.filter((conversation) =>
-    conversation.title.toLowerCase().includes(search.toLowerCase()),
-  )
+  const { data: session, isPending: sessionPending } = authClient.useSession()
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (messagesViewport.current) {
-      messagesViewport.current.scrollTop = messagesViewport.current.scrollHeight
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const values = new FormData(event.currentTarget)
+    const email = String(values.get('email'))
+    const password = String(values.get('password'))
+    setPending(true)
+    setError('')
+
+    try {
+      const result =
+        mode === 'sign-up'
+          ? await authClient.signUp.email({ name: String(values.get('name')), email, password })
+          : await authClient.signIn.email({ email, password })
+      if (result.error) setError(result.error.message ?? 'Authentication failed. Please try again.')
+    } catch {
+      setError('Could not connect to the server. Please try again.')
+    } finally {
+      setPending(false)
     }
-  }, [activeId, activeConversation?.messages.length])
-
-  function selectChat(id: number | null) {
-    setActiveId(id)
-    setDraft('')
-    setSidebarOpen(false)
-    setSearch('')
-    setSearchOpen(false)
   }
 
-  function sendMessage(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const content = draft.trim()
-    if (!content) return
-
-    const id = nextId.current++
-    const message: ChatMessage = { id, role: 'user', content }
-    if (activeConversation) {
-      setConversations((current) =>
-        current.map((conversation) =>
-          conversation.id === activeId
-            ? { ...conversation, messages: [...conversation.messages, message] }
-            : conversation,
-        ),
-      )
-    } else {
-      setConversations((current) => [{ id, title: content, messages: [message] }, ...current])
-      setActiveId(id)
+  async function handleSignOut() {
+    setPending(true)
+    setError('')
+    try {
+      const result = await authClient.signOut()
+      if (result.error) setError(result.error.message ?? 'Could not sign out. Please try again.')
+    } catch {
+      setError('Could not connect to the server. Please try again.')
+    } finally {
+      setPending(false)
     }
-    setDraft('')
+  }
+
+  if (session) {
+    return (
+      <ChatPage
+        user={session.user}
+        onSignOut={handleSignOut}
+        signOutPending={pending}
+        signOutError={error}
+      />
+    )
   }
 
   return (
-    <main className="flex h-dvh min-h-[420px] overflow-hidden bg-[#f8f8f6] text-[#242725]">
-      <aside
-        aria-label="Chat sidebar"
-        className="hidden w-[272px] shrink-0 border-r border-[#e9e9e5] lg:block"
-      >
-        <ChatSidebar
-          conversations={visibleConversations}
-          activeId={activeId}
-          searchOpen={searchOpen}
-          search={search}
-          onSearchOpenChange={setSearchOpen}
-          onSearchChange={setSearch}
-          onSelect={selectChat}
-        />
-      </aside>
-
-      <section className="flex min-w-0 flex-1 flex-col bg-[#fcfcfb]">
-        <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-[#f0f0ec] px-5 lg:px-9">
-          <div className="flex min-w-0 items-center gap-3">
-            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-              <SheetTrigger
-                aria-label="Open sidebar"
-                render={<Button variant="ghost" size="icon" className="-ml-2 lg:hidden" />}
-              >
-                <Menu size={19} />
-              </SheetTrigger>
-              <SheetContent side="left" className="gap-0 p-0 [&]:w-[272px] lg:hidden">
-                <SheetTitle className="sr-only">Chats</SheetTitle>
-                <ChatSidebar
-                  conversations={visibleConversations}
-                  activeId={activeId}
-                  searchOpen={searchOpen}
-                  search={search}
-                  onSearchOpenChange={setSearchOpen}
-                  onSearchChange={setSearch}
-                  onSelect={selectChat}
-                />
-              </SheetContent>
-            </Sheet>
-            <h1 className="truncate text-sm font-semibold text-[#464b46]">
-              {activeConversation?.title ?? 'New chat'}
-            </h1>
+    <main className="platform-theme min-h-screen bg-background text-foreground">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-7 sm:px-10">
+        <header className="flex items-center justify-between border-b border-border pb-6">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-xl bg-primary text-xl font-semibold text-primary-foreground">
+              U
+            </div>
+            <span className="text-lg font-semibold tracking-tight">Ultra Sakti</span>
           </div>
-          <span className="hidden items-center gap-1.5 rounded-full border border-[#e8ebe5] bg-white px-3 py-1.5 text-xs font-medium text-[#66806c] sm:inline-flex">
-            <span className="size-1.5 rounded-full bg-[#83ad8d]" /> Mock workspace
-          </span>
+          <span className="text-sm text-muted-foreground">Platform</span>
         </header>
 
-        <div ref={messagesViewport} className="min-h-0 flex-1 overflow-y-auto px-5 py-8 lg:px-12">
-          <div className="mx-auto flex min-h-full w-full max-w-[760px] flex-col">
-            {activeConversation ? (
-              <div className="space-y-8 pb-6">
-                <div className="mb-9 text-center">
-                  <span className="rounded-full border border-[#e9ebe6] bg-[#f7f8f5] px-3 py-1 text-[11px] font-medium tracking-wide text-[#8b918b]">
-                    TODAY
-                  </span>
-                </div>
-                {activeConversation.messages.map((message) =>
-                  message.role === 'user' ? (
-                    <Message key={message.id} align="end">
-                      <MessageContent>
-                        <Bubble align="end" variant="secondary" className="max-w-[80%]">
-                          <BubbleContent className="rounded-[20px] rounded-br-md bg-[#e9eee7] px-5 py-3.5 text-[15px] leading-6 text-[#303b32]">
-                            {message.content}
-                          </BubbleContent>
-                        </Bubble>
-                      </MessageContent>
-                    </Message>
-                  ) : (
-                    <Message key={message.id}>
-                      <MessageAvatar className="mt-0.5 size-8 self-start rounded-xl bg-[#dce9dd] text-[#477452]">
-                        <Sparkles size={17} />
-                      </MessageAvatar>
-                      <MessageContent className="max-w-[650px] gap-2 pt-0.5">
-                        <MessageHeader className="px-0 text-sm font-semibold text-[#242725]">
-                          Atelier
-                        </MessageHeader>
-                        <Bubble variant="ghost">
-                          <BubbleContent className="whitespace-pre-wrap text-[15px] leading-[1.75] text-[#4d534e]">
-                            {message.content}
-                          </BubbleContent>
-                        </Bubble>
-                      </MessageContent>
-                    </Message>
-                  ),
-                )}
-              </div>
-            ) : (
-              <Empty className="pb-10">
-                <EmptyHeader className="gap-3">
-                  <EmptyMedia className="mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#dce9dd] text-[#477452]">
-                    <Sparkles size={27} />
-                  </EmptyMedia>
-                  <EmptyTitle className="text-3xl font-semibold sm:text-4xl">
-                    <h2>What can I help you with?</h2>
-                  </EmptyTitle>
-                  <EmptyDescription className="text-[#8a908b]">
-                    A quiet place to think, write, and explore.
-                  </EmptyDescription>
-                </EmptyHeader>
-                <div className="mt-10 grid w-full max-w-[580px] grid-cols-1 gap-3 text-left sm:grid-cols-2">
-                  {suggestions.map(([title, detail]) => (
-                    <button
-                      key={title}
-                      className="rounded-2xl border border-[#e8eae5] bg-white px-5 py-4 text-left transition-colors hover:border-[#bbd0be] hover:bg-[#f8faf7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7b9d82]"
-                      onClick={() => setDraft(`${title} ${detail}`)}
-                    >
-                      <span className="block text-sm font-semibold">{title}</span>
-                      <span className="mt-1 block text-sm text-[#8a908b]">{detail}</span>
-                    </button>
-                  ))}
-                </div>
-              </Empty>
-            )}
-          </div>
-        </div>
-
-        <div className="shrink-0 px-4 pb-5 pt-2 lg:px-12 lg:pb-7">
-          <form
-            onSubmit={sendMessage}
-            className="mx-auto max-w-[760px] rounded-[22px] border border-[#e5e9e2] bg-white p-3 shadow-[0_10px_35px_rgba(42,55,43,0.05)] focus-within:border-[#a9c4ad]"
-          >
-            <Textarea
-              aria-label="Message Atelier"
-              placeholder="Message Atelier..."
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-                  event.preventDefault()
-                  event.currentTarget.form?.requestSubmit()
-                }
-              }}
-              rows={2}
-              className="max-h-40 min-h-[70px] resize-none border-0 px-2 py-2 text-[15px] shadow-none focus-visible:ring-0"
-            />
-            <div className="flex items-center justify-between px-1">
-              <span className="text-xs text-[#a1a6a0]">A mock conversation space</span>
-              <Button
-                type="submit"
-                size="icon"
-                aria-label="Send message"
-                disabled={!draft.trim()}
-                className="size-9 rounded-xl bg-[#42734d] text-white hover:bg-[#35653f]"
-              >
-                <ArrowUp size={18} />
-              </Button>
+        <div className="grid flex-1 items-center gap-12 py-12 lg:grid-cols-[1fr_420px] lg:gap-24">
+          <div className="max-w-xl">
+            <span className="mb-6 inline-flex rounded-full border border-ring bg-secondary px-3 py-1 text-xs font-medium tracking-wide text-secondary-foreground">
+              YOUR WORKSPACE
+            </span>
+            <h1 className="text-5xl font-semibold leading-[1.1] tracking-[-0.05em] sm:text-6xl">
+              A better place to get things done.
+            </h1>
+            <p className="mt-7 max-w-md text-lg leading-relaxed text-muted-foreground">
+              Everything starts with a secure account. Sign in to continue, or create yours in a few
+              moments.
+            </p>
+            <div className="mt-12 flex items-center gap-3 text-sm text-accent-foreground">
+              <span className="grid size-8 place-items-center rounded-full bg-accent text-accent-foreground">
+                ✓
+              </span>
+              Simple, secure access with your email
             </div>
-          </form>
-          <p className="mt-3 text-center text-[11px] text-[#a5aaa4]">
-            This is a local demo. Messages are not saved.
-          </p>
+          </div>
+
+          <section
+            className="rounded-3xl border border-input bg-card p-8 shadow-[0_24px_80px_-40px_rgba(29,57,39,0.3)] sm:p-10"
+            aria-label="Account"
+          >
+            {sessionPending ? (
+              <p role="status" className="text-muted-foreground">
+                Checking your session…
+              </p>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-secondary-foreground">
+                  WELCOME TO ULTRA SAKTI
+                </p>
+                <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                  {mode === 'sign-in' ? 'Sign in to your account' : 'Create your account'}
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {mode === 'sign-in'
+                    ? 'Enter your details to pick up where you left off.'
+                    : 'A few details and you’re ready to get started.'}
+                </p>
+                <div
+                  className="mt-8 grid grid-cols-2 rounded-xl bg-muted p-1"
+                  aria-label="Authentication mode"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={mode === 'sign-in'}
+                    onClick={() => {
+                      setMode('sign-in')
+                      setError('')
+                    }}
+                    className={`rounded-lg py-2 text-sm font-medium ${mode === 'sign-in' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={mode === 'sign-up'}
+                    onClick={() => {
+                      setMode('sign-up')
+                      setError('')
+                    }}
+                    className={`rounded-lg py-2 text-sm font-medium ${mode === 'sign-up' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                  >
+                    Sign up
+                  </button>
+                </div>
+                <form onSubmit={handleSubmit} className="mt-7 space-y-5">
+                  {mode === 'sign-up' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        autoComplete="name"
+                        required
+                        className="h-11"
+                        placeholder="Your name"
+                      />
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email address</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      className="h-11"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
+                      minLength={mode === 'sign-up' ? 8 : undefined}
+                      required
+                      className="h-11"
+                      placeholder="Enter your password"
+                    />
+                    {mode === 'sign-up' && (
+                      <p className="text-xs text-muted-foreground">Use at least 8 characters.</p>
+                    )}
+                  </div>
+                  {error && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {error}
+                    </p>
+                  )}
+                  <Button
+                    type="submit"
+                    disabled={pending}
+                    className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/85"
+                  >
+                    {pending ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
+                  </Button>
+                </form>
+              </>
+            )}
+          </section>
         </div>
-      </section>
+        <footer className="border-t border-border pt-5 text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Ultra Sakti
+        </footer>
+      </div>
     </main>
   )
 }

@@ -1,0 +1,17 @@
+.platform-theme {
+  --background: #f4f3ef;
+  --foreground: #202b25;
+  --card: #ffffff;
+  --card-foreground: #202b25;
+  --primary: #1e563c;
+  --primary-foreground: #ffffff;
+  --secondary: #e4f0e4;
+  --secondary-foreground: #286747;
+  --muted: #f2f5f1;
+  --muted-foreground: #65736b;
+  --accent: #dcebdc;
+  --accent-foreground: #24613e;
+  --border: #d8ddd5;
+  --input: #e1e6df;
+  --ring: #bfd3c4;
+}

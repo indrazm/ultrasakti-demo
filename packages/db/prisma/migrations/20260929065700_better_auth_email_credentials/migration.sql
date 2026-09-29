@@ -1,15 +1,7 @@
--- CreateTable
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "name" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
-    "image" TEXT,
-
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
+-- Add Better Auth fields to the original User model.
+ALTER TABLE "User"
+    ADD COLUMN "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN "image" TEXT;
 
 -- CreateTable
 CREATE TABLE "session" (
@@ -55,9 +47,6 @@ CREATE TABLE "verification" (
 
     CONSTRAINT "verification_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE INDEX "session_userId_idx" ON "session"("userId");

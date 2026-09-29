@@ -14,7 +14,9 @@ Use Better Auth with its Prisma adapter in `apps/api`, backed by the shared `@ul
 
 ## Consequences
 
-- The Prisma migration adds account, session, and verification tables and Better Auth fields to `User`.
+- The first Prisma migration records the original `User` schema; the second adds account, session, and verification tables and Better Auth fields. Existing databases with the original schema can baseline the first migration and apply the second without deleting users.
+- `User.name` remains nullable to preserve original rows, while new email sign-ups provide a name.
 - The API requires `DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, and `PLATFORM_ORIGIN` at runtime.
 - The platform requires `VITE_API_URL` at build time.
 - Local browser end-to-end testing requires a migrated PostgreSQL service.
+- The default session cookie flow assumes the platform and API share a site, such as subdomains of one registrable domain, with `BETTER_AUTH_URL` set to HTTPS in production. Unrelated domains need a same-site reverse proxy or a separately designed cross-site cookie setup. Cross-subdomain cookies do not make unrelated domains same-site.

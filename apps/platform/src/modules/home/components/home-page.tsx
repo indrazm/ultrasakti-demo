@@ -3,6 +3,7 @@ import { Button } from '@ultrasakti/ui/components/button'
 import { Input } from '@ultrasakti/ui/components/input'
 import { Label } from '@ultrasakti/ui/components/label'
 import { authClient } from '../../auth/api/auth-client'
+import { ChatPage } from './chat-page'
 
 export function HomePage() {
   const { data: session, isPending: sessionPending } = authClient.useSession()
@@ -42,6 +43,17 @@ export function HomePage() {
     } finally {
       setPending(false)
     }
+  }
+
+  if (session) {
+    return (
+      <ChatPage
+        user={session.user}
+        onSignOut={handleSignOut}
+        signOutPending={pending}
+        signOutError={error}
+      />
+    )
   }
 
   return (
@@ -85,32 +97,6 @@ export function HomePage() {
               <p role="status" className="text-muted-foreground">
                 Checking your session…
               </p>
-            ) : session ? (
-              <div className="space-y-6">
-                <div className="grid size-12 place-items-center rounded-2xl bg-accent text-2xl text-accent-foreground">
-                  ✓
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-secondary-foreground">SIGNED IN</p>
-                  <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                    Welcome, {session.user.name}
-                  </h2>
-                  <p className="mt-2 text-muted-foreground">{session.user.email}</p>
-                </div>
-                {error && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {error}
-                  </p>
-                )}
-                <Button
-                  variant="outline"
-                  className="h-11 w-full"
-                  disabled={pending}
-                  onClick={handleSignOut}
-                >
-                  Sign out
-                </Button>
-              </div>
             ) : (
               <>
                 <p className="text-sm font-medium text-secondary-foreground">

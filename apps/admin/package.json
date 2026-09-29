@@ -6,6 +6,7 @@
     "with-env": "dotenv -e ../../.env --",
     "dev": "pnpm with-env vite --host 0.0.0.0",
     "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -9,6 +9,7 @@
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
     "generate": "pnpm with-env prisma generate",
+    "typecheck": "pnpm generate && tsc --noEmit",
     "migrate:dev": "pnpm with-env prisma migrate dev",
     "migrate:deploy": "pnpm with-env prisma migrate deploy",
     "studio": "pnpm with-env prisma studio"

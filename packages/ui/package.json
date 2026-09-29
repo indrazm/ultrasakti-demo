@@ -8,6 +8,9 @@
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@shadcn/react": "^0.3.1",
@@ -24,12 +27,13 @@
     "shadcn": "latest",
     "tw-animate-css": "latest"
   },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "^7.0.2"
+  },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
-  },
-  "devDependencies": {
-    "@types/react": "latest",
-    "@types/react-dom": "latest"
   }
 }

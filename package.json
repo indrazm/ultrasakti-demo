@@ -2,11 +2,13 @@
   "name": "training-ultra-sakti",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "dev": "pnpm --parallel --filter @ultrasakti/api --filter @ultrasakti/platform dev",
     "dev:api": "pnpm --filter @ultrasakti/api dev",
     "dev:platform": "pnpm --filter @ultrasakti/platform dev",
     "dev:admin": "pnpm --filter @ultrasakti/admin dev",
     "build": "pnpm -r build",
+    "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:watch": "pnpm -r --parallel --if-present test:watch",
     "test:e2e": "playwright test",
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "dotenv-cli": "latest",
+    "husky": "^9.1.7",
     "oxfmt": "latest",
     "oxlint": "latest"
   },

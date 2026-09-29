@@ -7,9 +7,8 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
-      "@ultrasakti/ui/*": ["src/*"]
+      "@ultrasakti/ui/*": ["./src/*"]
     }
   },
   "include": ["src"]

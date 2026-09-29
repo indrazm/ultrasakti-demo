@@ -5,5 +5,7 @@ dist
 .DS_Store
 .env
 !.env.example
-apps/platform/src/routeTree.gen.ts
+apps/*/src/routeTree.gen.ts
 packages/db/src/generated/
+playwright-report/
+test-results/

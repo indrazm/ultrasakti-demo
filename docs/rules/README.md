@@ -7,4 +7,5 @@ These rules guide agents and contributors working in this repository. Read the r
 - [Database](./database.md): Prisma, migrations, PostgreSQL, and Redis.
 - [Frontend](./frontend.md): routes, modules, data fetching, and UI.
 - [Monorepo](./monorepo.md): workspace boundaries and package imports.
+- [Testing](./testing.md): unit tests and browser end-to-end tests.
 - [Tooling](./tooling.md): environment variables, linting, and formatting.

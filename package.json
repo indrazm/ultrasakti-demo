@@ -1,13 +1,18 @@
 {
   "name": "training-ultra-sakti",
   "private": true,
-  "packageManager": "pnpm@12.4.2",
   "scripts": {
     "dev": "pnpm --parallel --filter @ultrasakti/api --filter @ultrasakti/platform dev",
     "dev:api": "pnpm --filter @ultrasakti/api dev",
     "dev:platform": "pnpm --filter @ultrasakti/platform dev",
     "dev:admin": "pnpm --filter @ultrasakti/admin dev",
     "build": "pnpm -r build",
+    "test": "pnpm -r --if-present test",
+    "test:watch": "pnpm -r --parallel --if-present test:watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:video": "PLAYWRIGHT_VIDEO=on playwright test",
+    "test:e2e:install": "playwright install chromium",
     "db:up": "docker compose -f docker-compose.dev.yml up -d",
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "lint": "oxlint .",
@@ -16,8 +21,10 @@
     "format:check": "oxfmt --check ."
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "dotenv-cli": "latest",
     "oxfmt": "latest",
     "oxlint": "latest"
-  }
+  },
+  "packageManager": "pnpm@12.4.2"
 }

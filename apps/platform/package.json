@@ -13,6 +13,9 @@
     "e2e:serve": "pnpm with-env vite --host 127.0.0.1 --port 4174 --strictPort"
   },
   "dependencies": {
+    "@anvia/client": "^1.2.0",
+    "@anvia/react": "^1.1.3",
+    "@anvia/react-ui": "^1.1.6",
     "@tanstack/react-query": "latest",
     "@tanstack/react-router": "latest",
     "@ultrasakti/ui": "workspace:*",

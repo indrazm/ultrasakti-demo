@@ -43,7 +43,7 @@ export default defineConfig({
     },
     {
       command: 'PLATFORM_ORIGIN=http://localhost:4174 pnpm --filter @ultrasakti/api dev',
-      url: 'http://localhost:3000/api/health',
+      url: `http://localhost:${process.env.E2E_API_PORT ?? 3000}/api/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

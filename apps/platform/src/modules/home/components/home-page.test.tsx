@@ -1,12 +1,16 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { HomePage } from './home-page'
 
-describe('platform home page', () => {
-  it('renders the welcome content and primary action', () => {
-    render(<HomePage />)
+vi.mock('../../auth/api/auth-client', () => ({
+  authClient: { useSession: () => ({ data: null, isPending: false }) },
+}))
 
-    expect(screen.getByRole('heading', { name: 'Platform is ready' })).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Get started' })).toBeVisible()
+describe('platform home page', () => {
+  it('renders the email sign-in form', () => {
+    render(<HomePage />)
+    expect(screen.getByRole('heading', { name: 'Sign in to your account' })).toBeVisible()
+    expect(screen.getByRole('textbox', { name: 'Email address' })).toBeVisible()
+    expect(screen.getAllByRole('button', { name: 'Sign in' })[1]).toBeVisible()
   })
 })

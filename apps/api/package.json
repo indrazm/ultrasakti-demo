@@ -4,15 +4,17 @@
   "type": "module",
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
-    "dev": "pnpm with-env tsx watch src/index.ts",
-    "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit",
+    "dev": "pnpm --filter @ultrasakti/db generate && pnpm with-env tsx watch src/index.ts",
+    "build": "pnpm --filter @ultrasakti/db generate && tsc --noEmit",
+    "typecheck": "pnpm --filter @ultrasakti/db generate && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@hono/node-server": "latest",
     "@hono/zod-validator": "latest",
+    "@ultrasakti/db": "workspace:*",
+    "better-auth": "^1.7.6",
     "hono": "latest",
     "zod": "latest"
   },

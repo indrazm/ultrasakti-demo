@@ -2,18 +2,21 @@
 
 pnpm monorepo with an API, a React platform app, and shared shadcn/ui components.
 
-Repository architecture decisions and their recording rules are in [docs/decisions](./docs/decisions/README.md).
+Repository architecture decisions and their recording rules are in [docs/decision](./docs/decision/README.md).
 
 ## Start the apps
 
 ```sh
 pnpm install
+cp .env.example .env
+pnpm db:up
+pnpm --filter @ultrasakti/db migrate:deploy
 pnpm dev
 ```
 
 The API listens on `http://localhost:3000` and each Vite app prints its local URL. Start them with `pnpm dev:api`, `pnpm dev:platform`, or `pnpm dev:admin`.
 
-Both apps load the shared root `.env` through their `with-env` scripts. Copy `.env.example` to `.env` when setting up a fresh checkout.
+Before starting the API, set `BETTER_AUTH_SECRET` in the root `.env` to a random value of at least 32 characters (for example, generate one with `openssl rand -base64 32`). The platform and API URLs and `PLATFORM_ORIGIN` in that file must match the addresses used locally. Apps load the shared root `.env` through their `with-env` scripts.
 
 ## Workspaces
 

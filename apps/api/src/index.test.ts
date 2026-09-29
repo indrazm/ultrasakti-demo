@@ -1,5 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { app } from './index'
+
+vi.mock('./modules/auth/auth', () => ({
+  auth: { handler: vi.fn() },
+  platformOrigin: 'http://localhost:5173',
+}))
 
 describe('API routes', () => {
   it('returns a healthy status', async () => {

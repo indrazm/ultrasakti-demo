@@ -16,6 +16,7 @@
     "@tanstack/react-query": "latest",
     "@tanstack/react-router": "latest",
     "@ultrasakti/ui": "workspace:*",
+    "better-auth": "^1.7.6",
     "react": "latest",
     "react-dom": "latest"
   },

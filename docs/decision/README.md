@@ -17,3 +17,4 @@ This directory records durable repository choices and their history. Follow [rul
 | [0011](./0011-admin-app-copy.md)              | Separate admin app workspace    | Accepted |
 | [0012](./0012-runtime-package-placeholder.md) | Runtime package placeholder     | Accepted |
 | [0013](./0013-husky-pre-commit-checks.md)     | Husky pre-commit quality checks | Accepted |
+| [0014](./0014-platform-email-auth.md)         | Platform email authentication   | Accepted |

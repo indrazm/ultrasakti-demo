@@ -279,6 +279,9 @@ importers:
       '@ultrasakti/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.3.0)
       react:
         specifier: latest
         version: 19.3.0

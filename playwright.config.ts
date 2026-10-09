@@ -8,6 +8,9 @@ const baseUse = {
   trace: 'on-first-retry' as const,
 }
 
+const e2eApiPort = process.env.E2E_API_PORT ?? '3000'
+const e2eApiUrl = `http://localhost:${e2eApiPort}`
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -36,14 +39,14 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'pnpm --filter @ultrasakti/platform e2e:serve',
+      command: `VITE_API_URL=${e2eApiUrl} pnpm --filter @ultrasakti/platform e2e:serve`,
       url: 'http://localhost:4174',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: 'PLATFORM_ORIGIN=http://localhost:4174 pnpm --filter @ultrasakti/api dev',
-      url: 'http://localhost:3000/api/health',
+      command: `PORT=${e2eApiPort} PLATFORM_ORIGIN=http://localhost:4174 pnpm --filter @ultrasakti/api dev`,
+      url: `${e2eApiUrl}/api/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

@@ -15,6 +15,9 @@ export function streamChat(body: Extract<ClientStreamRequest, { type: 'messages'
   }))
   return agentToClientStream({
     events: agent.stream({ messages }),
-    mapError: () => ({ message: 'The assistant could not complete this response.' }),
+    mapError: (error) => {
+      console.error('Chat stream failed', error instanceof Error ? error.name : 'UnknownError')
+      return { message: 'The assistant could not complete this response.' }
+    },
   })
 }

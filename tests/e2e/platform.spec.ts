@@ -16,7 +16,7 @@ async function signUp(page: Page) {
 
 async function mockChat(page: Page) {
   await page.route(
-    `${process.env.VITE_API_URL ?? 'http://localhost:3000'}/api/chat`,
+    `http://localhost:${process.env.E2E_API_PORT ?? 3000}/api/chat`,
     async (route) => {
       const streamId = 'test-stream'
       const runId = 'test-run'

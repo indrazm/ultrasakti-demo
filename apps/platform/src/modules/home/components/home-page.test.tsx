@@ -15,7 +15,7 @@ describe('platform home page', () => {
     expect(screen.getAllByRole('button', { name: 'Sign in' })[1]).toBeVisible()
   })
 
-  it('renders the mock conversation for a signed-in user', () => {
+  it('renders a ready chat for a signed-in user', () => {
     render(
       <ChatPage
         user={{ name: 'Platform Tester', email: 'tester@example.com' }}
@@ -24,8 +24,7 @@ describe('platform home page', () => {
         signOutError=""
       />,
     )
-    expect(screen.getByRole('heading', { name: 'Planning a product launch' })).toBeVisible()
-    expect(screen.getByText('What should we focus on in the first two weeks?')).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'What can I help you with?' })).toBeVisible()
     expect(screen.getByRole('textbox', { name: 'Message Atelier' })).toBeVisible()
     expect(screen.getByText('Platform Tester')).toBeVisible()
   })

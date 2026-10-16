@@ -19,3 +19,4 @@ This directory records durable repository choices and their history. Follow [rul
 | [0013](./0013-husky-pre-commit-checks.md)     | Husky pre-commit quality checks | Accepted |
 | [0014](./0014-platform-email-auth.md)         | Platform email authentication   | Accepted |
 | [0015](./0015-chat-session-memory.md)         | Persistent chat sessions        | Accepted |
+| [0016](./0016-github-actions-deployment.md)   | GitHub Actions CI and deployment | Accepted |

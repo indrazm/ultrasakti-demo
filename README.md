@@ -4,6 +4,8 @@ pnpm monorepo with an API, a React platform app, and shared shadcn/ui components
 
 Repository architecture decisions and their recording rules are in [docs/decision](./docs/decision/README.md).
 
+CI and production deployment are described in [deploy/README.md](./deploy/README.md).
+
 ## Start the apps
 
 ```sh

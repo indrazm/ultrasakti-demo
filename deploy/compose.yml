@@ -1,0 +1,85 @@
+name: ultrasakti
+x-defaults: &defaults
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: '3'
+services:
+  postgres:
+    <<: *defaults
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${POSTGRES_DB:?required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  redis:
+    <<: *defaults
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, 'yes']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  api:
+    <<: *defaults
+    stop_grace_period: 40s
+    image: ultrasakti-api:${RELEASE_SHA:?required}
+    build:
+      context: ${RELEASE_PATH:?required}
+      dockerfile: deploy/Dockerfile
+      target: api
+      args:
+        VITE_API_URL: ${VITE_API_URL:?required}
+    env_file:
+      - path: /opt/app/source/.env
+        format: raw
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+  web:
+    <<: *defaults
+    image: ultrasakti-web:${RELEASE_SHA:?required}
+    build:
+      context: ${RELEASE_PATH:?required}
+      dockerfile: deploy/Dockerfile
+      target: web
+      args:
+        VITE_API_URL: ${VITE_API_URL:?required}
+    ports:
+      - 127.0.0.1:8080:80
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1/api/health]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+volumes:
+  postgres_data:
+  redis_data:

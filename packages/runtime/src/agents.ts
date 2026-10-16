@@ -18,5 +18,6 @@ export function createAgent(options: CreateAgentOptions = {}) {
     model: options.model ?? getModel(),
     instructions: options.instructions ?? defaultInstructions,
     tools: options.tools ?? getDefaultTools(),
+    memory: options.memory,
   })
 }

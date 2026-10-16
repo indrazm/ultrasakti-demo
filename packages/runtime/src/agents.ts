@@ -1,5 +1,6 @@
 import { Agent, type AgentOptions } from '@anvia/core'
 import { getModel } from './models.ts'
+import { getLensClient } from './observability.ts'
 import { defaultInstructions } from './prompts/default.ts'
 import { createWebSearchTools } from './tools/web-search/index.ts'
 
@@ -19,5 +20,9 @@ export function createAgent(options: CreateAgentOptions = {}) {
     instructions: options.instructions ?? defaultInstructions,
     tools: options.tools ?? getDefaultTools(),
     memory: options.memory,
+    observability: options.observability ?? {
+      observers: { lens: getLensClient().observer() },
+      primaryTrace: 'lens',
+    },
   })
 }

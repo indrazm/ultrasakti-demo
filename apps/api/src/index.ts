@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server'
 import { zValidator } from '@hono/zod-validator'
+import { closeRuntimeObservability } from '@ultrasakti/runtime'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { z } from 'zod'
@@ -31,7 +32,30 @@ app.post('/api/echo', zValidator('json', z.object({ message: z.string().min(1) }
 
 if (!process.env.VITEST) {
   const port = Number(process.env.PORT ?? 3000)
-  serve({ fetch: app.fetch, port }, (info) => {
+  const server = serve({ fetch: app.fetch, port }, (info) => {
     console.log(`API listening on http://localhost:${info.port}`)
   })
+
+  let shuttingDown = false
+  const shutdown = () => {
+    if (shuttingDown) return
+    shuttingDown = true
+    const timeout = setTimeout(() => {
+      console.error('API shutdown timed out')
+      process.exit(1)
+    }, 30_000)
+    server.close(async (error) => {
+      try {
+        await closeRuntimeObservability()
+        process.exit(error ? 1 : 0)
+      } catch {
+        console.error('Failed to close runtime observability')
+        process.exit(1)
+      } finally {
+        clearTimeout(timeout)
+      }
+    })
+  }
+  process.once('SIGINT', shutdown)
+  process.once('SIGTERM', shutdown)
 }

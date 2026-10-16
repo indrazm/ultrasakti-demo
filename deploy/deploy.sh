@@ -23,8 +23,8 @@ if [[ ! -d $repository ]]; then
   git init --bare "$repository"
   git --git-dir="$repository" remote add origin https://github.com/indrazm/ultrasakti-demo.git
 fi
-git --git-dir="$repository" fetch --depth=1 origin refs/heads/main:refs/heads/main
-if [[ $(git --git-dir="$repository" rev-parse refs/heads/main) != "$sha" ]]; then
+git --git-dir="$repository" fetch --depth=1 origin refs/heads/main
+if [[ $(git --git-dir="$repository" rev-parse FETCH_HEAD) != "$sha" ]]; then
   echo 'Refusing to deploy a commit other than the current main tip.' >&2
   exit 1
 fi

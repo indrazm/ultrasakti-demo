@@ -85,6 +85,7 @@ model AgentMemorySession {
   errors   AgentMemoryError[]
 
   @@index([sessionId, userId])
+  @@index([userId, updatedAt, id])
 }
 
 model AgentMemoryMessage {

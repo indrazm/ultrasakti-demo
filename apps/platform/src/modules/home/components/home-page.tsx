@@ -4,8 +4,9 @@ import { Input } from '@ultrasakti/ui/components/input'
 import { Label } from '@ultrasakti/ui/components/label'
 import { authClient } from '../../auth/api/auth-client'
 import { ChatPage } from './chat-page'
+import type { SessionNavigation } from '../types'
 
-export function HomePage() {
+export function HomePage(sessionNavigation: SessionNavigation) {
   const { data: session, isPending: sessionPending } = authClient.useSession()
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
   const [pending, setPending] = useState(false)
@@ -48,6 +49,8 @@ export function HomePage() {
   if (session) {
     return (
       <ChatPage
+        {...sessionNavigation}
+        key={session.user.id}
         user={session.user}
         onSignOut={handleSignOut}
         signOutPending={pending}

@@ -1,24 +1,18 @@
-import { useState } from 'react'
-import { createHttpClientTransport } from '@anvia/client'
-import { useChat } from '@anvia/react'
+import { useEffect, useState } from 'react'
 import { ChatProvider, ComposerPrimitive, MessagePrimitive, ThreadPrimitive } from '@anvia/react-ui'
 import { Menu, Sparkles } from 'lucide-react'
 import { Button } from '@ultrasakti/ui/components/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@ultrasakti/ui/components/sheet'
 import { ChatSidebar } from './chat-sidebar'
+import { useSessionChat } from '../hooks/use-session-chat'
+import type { SessionNavigation } from '../types'
 
-type ChatPageProps = {
-  user: { name: string; email: string }
+type ChatPageProps = SessionNavigation & {
+  user: { id: string; name: string; email: string }
   onSignOut: () => void
   signOutPending: boolean
   signOutError: string
 }
-
-const transport = createHttpClientTransport({
-  endpoint: `${import.meta.env.VITE_API_URL}/api/chat`,
-  format: 'jsonl',
-  init: { credentials: 'include' },
-})
 
 const suggestions = [
   ['Make a plan', 'for a project I have in mind'],
@@ -27,21 +21,58 @@ const suggestions = [
   ['Learn a concept', 'one step at a time'],
 ]
 
-export function ChatPage({ user, onSignOut, signOutPending, signOutError }: ChatPageProps) {
-  const chat = useChat({ transport })
+export function ChatPage({
+  user,
+  onSignOut,
+  signOutPending,
+  signOutError,
+  ...navigation
+}: ChatPageProps) {
+  const sessionChat = useSessionChat(user.id, navigation)
+  const { chat, sessions, activeSessionId, loadingHistory, historyError, busy } = sessionChat
   const [draft, setDraft] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const title = chat.messages
-    .find((message) => message.role === 'user')
-    ?.parts.filter((part) => part.type === 'text')
-    .map((part) => part.text)
-    .join('')
+  useEffect(() => {
+    setDraft('')
+    setSidebarOpen(false)
+  }, [activeSessionId])
+  const title = activeSessionId
+    ? chat.messages
+        .find((message) => message.role === 'user')
+        ?.parts.filter((part) => part.type === 'text')
+        .map((part) => part.text)
+        .join('')
+    : undefined
 
   function newChat() {
-    chat.reset()
+    sessionChat.newChat()
     setDraft('')
     setSidebarOpen(false)
   }
+
+  function selectSession(sessionId: string) {
+    setDraft('')
+    setSidebarOpen(false)
+    void sessionChat.selectSession(sessionId)
+  }
+
+  const sidebar = (
+    <ChatSidebar
+      user={user}
+      sessions={sessions.data?.pages.flatMap((page) => page.sessions) ?? []}
+      activeSessionId={activeSessionId}
+      activeTitle={title}
+      onNewChat={newChat}
+      onSelectSession={selectSession}
+      disabled={busy}
+      loading={sessions.isPending}
+      error={sessions.isError}
+      onRetry={() => void sessions.refetch()}
+      hasMore={sessions.hasNextPage}
+      loadingMore={sessions.isFetchingNextPage}
+      onLoadMore={() => void sessions.fetchNextPage()}
+    />
+  )
 
   return (
     <ChatProvider controller={chat}>
@@ -50,7 +81,7 @@ export function ChatPage({ user, onSignOut, signOutPending, signOutError }: Chat
           aria-label="Chat sidebar"
           className="hidden w-[272px] shrink-0 border-r border-[#e9e9e5] lg:block"
         >
-          <ChatSidebar user={user} title={title} onNewChat={newChat} />
+          {sidebar}
         </aside>
         <section className="flex min-w-0 flex-1 flex-col bg-[#fcfcfb]">
           <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-[#f0f0ec] px-5 lg:px-9">
@@ -64,7 +95,7 @@ export function ChatPage({ user, onSignOut, signOutPending, signOutError }: Chat
                 </SheetTrigger>
                 <SheetContent side="left" className="gap-0 p-0 [&]:w-[272px] lg:hidden">
                   <SheetTitle className="sr-only">Chats</SheetTitle>
-                  <ChatSidebar user={user} title={title} onNewChat={newChat} />
+                  {sidebar}
                 </SheetContent>
               </Sheet>
               <h1 className="truncate text-sm font-semibold text-[#464b46]">
@@ -82,57 +113,78 @@ export function ChatPage({ user, onSignOut, signOutPending, signOutError }: Chat
               </Button>
             </div>
           </header>
+          {loadingHistory && (
+            <p role="status" className="px-5 py-3 text-sm">
+              Loading conversation…
+            </p>
+          )}
+          {historyError && (
+            <div role="alert" className="px-5 py-3 text-sm text-destructive">
+              {historyError}
+              <Button variant="ghost" size="sm" onClick={sessionChat.retryHistory}>
+                Retry
+              </Button>
+            </div>
+          )}
           <ThreadPrimitive.Root className="flex min-h-0 flex-1 flex-col">
             <ThreadPrimitive.Viewport
               autoScroll={chat.messages.length > 0}
               className="min-h-0 flex-1 overflow-y-auto px-5 py-8 lg:px-12"
             >
               <div className="mx-auto w-full max-w-[760px]">
-                <ThreadPrimitive.Empty className="flex min-h-[50vh] flex-col items-center justify-center pb-10 text-center">
-                  <span className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-[#dce9dd] text-[#477452]">
-                    <Sparkles size={27} />
-                  </span>
-                  <h2 className="text-3xl font-semibold sm:text-4xl">What can I help you with?</h2>
-                  <p className="mt-3 text-[#8a908b]">A quiet place to think, write, and explore.</p>
-                  <div className="mt-10 grid w-full max-w-[580px] grid-cols-1 gap-3 text-left sm:grid-cols-2">
-                    {suggestions.map(([heading, detail]) => (
-                      <button
-                        key={heading}
-                        className="rounded-2xl border border-[#e8eae5] bg-white px-5 py-4 text-left hover:border-[#bbd0be] hover:bg-[#f8faf7]"
-                        onClick={() => setDraft(`${heading} ${detail}`)}
-                      >
-                        <span className="block text-sm font-semibold">{heading}</span>
-                        <span className="mt-1 block text-sm text-[#8a908b]">{detail}</span>
-                      </button>
-                    ))}
+                {!activeSessionId && (
+                  <div className="flex min-h-[50vh] flex-col items-center justify-center pb-10 text-center">
+                    <span className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-[#dce9dd] text-[#477452]">
+                      <Sparkles size={27} />
+                    </span>
+                    <h2 className="text-3xl font-semibold sm:text-4xl">
+                      What can I help you with?
+                    </h2>
+                    <p className="mt-3 text-[#8a908b]">
+                      A quiet place to think, write, and explore.
+                    </p>
+                    <div className="mt-10 grid w-full max-w-[580px] grid-cols-1 gap-3 text-left sm:grid-cols-2">
+                      {suggestions.map(([heading, detail]) => (
+                        <button
+                          key={heading}
+                          className="rounded-2xl border border-[#e8eae5] bg-white px-5 py-4 text-left hover:border-[#bbd0be] hover:bg-[#f8faf7]"
+                          onClick={() => setDraft(`${heading} ${detail}`)}
+                        >
+                          <span className="block text-sm font-semibold">{heading}</span>
+                          <span className="mt-1 block text-sm text-[#8a908b]">{detail}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </ThreadPrimitive.Empty>
-                <ThreadPrimitive.Messages className="space-y-8 pb-6">
-                  {(message) => (
-                    <MessagePrimitive.Root
-                      key={message.id}
-                      className={message.role === 'user' ? 'flex justify-end' : 'flex gap-3'}
-                    >
-                      {message.role === 'assistant' && (
-                        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#dce9dd] text-[#477452]">
-                          <Sparkles size={17} />
-                        </span>
-                      )}
-                      <MessagePrimitive.Content
-                        className={
-                          message.role === 'user'
-                            ? 'max-w-[80%] rounded-[20px] rounded-br-md bg-[#e9eee7] px-5 py-3.5 text-[15px] leading-6 text-[#303b32]'
-                            : 'max-w-[650px] whitespace-pre-wrap pt-0.5 text-[15px] leading-[1.75] text-[#4d534e]'
-                        }
+                )}
+                {activeSessionId && !loadingHistory && (
+                  <ThreadPrimitive.Messages className="space-y-8 pb-6">
+                    {(message) => (
+                      <MessagePrimitive.Root
+                        key={message.id}
+                        className={message.role === 'user' ? 'flex justify-end' : 'flex gap-3'}
                       >
                         {message.role === 'assistant' && (
-                          <p className="mb-2 text-sm font-semibold text-[#242725]">Atelier</p>
+                          <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#dce9dd] text-[#477452]">
+                            <Sparkles size={17} />
+                          </span>
                         )}
-                        <MessagePrimitive.Parts filter={(part) => part.type === 'text'} />
-                      </MessagePrimitive.Content>
-                    </MessagePrimitive.Root>
-                  )}
-                </ThreadPrimitive.Messages>
+                        <MessagePrimitive.Content
+                          className={
+                            message.role === 'user'
+                              ? 'max-w-[80%] rounded-[20px] rounded-br-md bg-[#e9eee7] px-5 py-3.5 text-[15px] leading-6 text-[#303b32]'
+                              : 'max-w-[650px] whitespace-pre-wrap pt-0.5 text-[15px] leading-[1.75] text-[#4d534e]'
+                          }
+                        >
+                          {message.role === 'assistant' && (
+                            <p className="mb-2 text-sm font-semibold text-[#242725]">Atelier</p>
+                          )}
+                          <MessagePrimitive.Parts filter={(part) => part.type === 'text'} />
+                        </MessagePrimitive.Content>
+                      </MessagePrimitive.Root>
+                    )}
+                  </ThreadPrimitive.Messages>
+                )}
                 <ThreadPrimitive.Loading role="status" className="text-sm text-[#8a908b]">
                   Atelier is thinking…
                 </ThreadPrimitive.Loading>
@@ -151,10 +203,13 @@ export function ChatPage({ user, onSignOut, signOutPending, signOutError }: Chat
                   aria-label="Message Atelier"
                   placeholder="Message Atelier..."
                   rows={2}
+                  disabled={loadingHistory || Boolean(historyError)}
                   className="max-h-40 min-h-[70px] w-full resize-none border-0 px-2 py-2 text-[15px] outline-none"
                 />
                 <div className="flex items-center justify-between px-1">
-                  <span className="text-xs text-[#a1a6a0]">Messages are not saved.</span>
+                  <span className="text-xs text-[#a1a6a0]">
+                    Conversations are saved to your account.
+                  </span>
                   {chat.status === 'streaming' || chat.status === 'submitted' ? (
                     <ComposerPrimitive.Stop className="rounded-xl bg-[#42734d] px-3 py-2 text-sm text-white">
                       Stop
@@ -162,6 +217,7 @@ export function ChatPage({ user, onSignOut, signOutPending, signOutError }: Chat
                   ) : (
                     <ComposerPrimitive.Submit
                       aria-label="Send message"
+                      disabled={loadingHistory || Boolean(historyError)}
                       className="rounded-xl bg-[#42734d] px-3 py-2 text-sm text-white disabled:opacity-50"
                     >
                       Send

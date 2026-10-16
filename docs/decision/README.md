@@ -18,3 +18,4 @@ This directory records durable repository choices and their history. Follow [rul
 | [0012](./0012-runtime-package-placeholder.md) | Runtime package placeholder     | Accepted |
 | [0013](./0013-husky-pre-commit-checks.md)     | Husky pre-commit quality checks | Accepted |
 | [0014](./0014-platform-email-auth.md)         | Platform email authentication   | Accepted |
+| [0015](./0015-chat-session-memory.md)         | Persistent chat sessions        | Accepted |

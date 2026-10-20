@@ -4,6 +4,7 @@ import { ArrowUp, Asterisk, PanelLeft, Square } from 'lucide-react'
 import { Button } from '@ultrasakti/ui/components/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@ultrasakti/ui/components/sheet'
 import { ApprovalPrompt } from './approval-prompt'
+import { artifactMarkdownComponents } from './artifact-markdown'
 import { ChatSidebar } from './chat-sidebar'
 import { useSessionChat } from '../hooks/use-session-chat'
 import type { SessionNavigation } from '../types'
@@ -185,7 +186,11 @@ export function ChatPage({
                           {message.role === 'assistant' ? (
                             <MessagePrimitive.Parts>
                               {(part) =>
-                                part.type === 'text' ? <MessagePrimitive.Markdown /> : null
+                                part.type === 'text' ? (
+                                  <MessagePrimitive.Markdown
+                                    components={artifactMarkdownComponents}
+                                  />
+                                ) : null
                               }
                             </MessagePrimitive.Parts>
                           ) : (

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryScopeKey, memoryStore, prisma } from '@ultrasakti/db'
+import { readSandboxArtifact } from '@ultrasakti/runtime'
 import { app } from '../../index'
 import { auth } from '../auth/auth'
 
@@ -19,6 +20,8 @@ vi.mock('@ultrasakti/db', () => ({
   createMemoryScopeKey: vi.fn().mockReturnValue('scoped-key'),
 }))
 
+vi.mock('@ultrasakti/runtime', () => ({ readSandboxArtifact: vi.fn() }))
+
 beforeEach(() => vi.clearAllMocks())
 
 describe('sessions API', () => {
@@ -26,6 +29,7 @@ describe('sessions API', () => {
     ['GET', '/api/sessions'],
     ['POST', '/api/sessions'],
     ['GET', `/api/sessions/${sessionId}`],
+    ['GET', `/api/sessions/${sessionId}/artifacts/chart.png`],
   ])('requires authentication for %s %s', async (method, path) => {
     vi.mocked(auth.api.getSession).mockResolvedValueOnce(null)
     const response = await app.request(path, { method })
@@ -148,4 +152,55 @@ describe('sessions API', () => {
       expect((await app.request(path)).status).toBe(400)
     },
   )
+
+  describe('artifacts', () => {
+    const path = `/api/sessions/${sessionId}/artifacts/chart.png`
+
+    it('serves an image inline to the session owner', async () => {
+      vi.mocked(prisma.agentMemorySession.findFirst).mockResolvedValueOnce({ sessionId } as never)
+      vi.mocked(readSandboxArtifact).mockResolvedValueOnce(new Uint8Array([137, 80, 78, 71]))
+      const response = await app.request(path)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toBe('image/png')
+      expect(response.headers.get('content-disposition')).toContain('inline')
+      expect(response.headers.get('content-security-policy')).toBe('sandbox')
+      expect(readSandboxArtifact).toHaveBeenCalledWith('owner', sessionId, 'chart.png')
+    })
+
+    it('serves svg charts inline', async () => {
+      vi.mocked(prisma.agentMemorySession.findFirst).mockResolvedValueOnce({ sessionId } as never)
+      vi.mocked(readSandboxArtifact).mockResolvedValueOnce(new Uint8Array([60, 115]))
+      const response = await app.request(`/api/sessions/${sessionId}/artifacts/chart.svg`)
+      expect(response.headers.get('content-type')).toBe('image/svg+xml')
+      expect(response.headers.get('content-disposition')).toContain('inline')
+      expect(response.headers.get('content-security-policy')).toBe('sandbox')
+    })
+
+    it('serves non-image files as downloads', async () => {
+      vi.mocked(prisma.agentMemorySession.findFirst).mockResolvedValueOnce({ sessionId } as never)
+      vi.mocked(readSandboxArtifact).mockResolvedValueOnce(new Uint8Array([1]))
+      const response = await app.request(`/api/sessions/${sessionId}/artifacts/page.html`)
+      expect(response.headers.get('content-type')).toBe('application/octet-stream')
+      expect(response.headers.get('content-disposition')).toContain('attachment')
+    })
+
+    it('does not read files for a session the user does not own', async () => {
+      vi.mocked(prisma.agentMemorySession.findFirst).mockResolvedValueOnce(null)
+      const response = await app.request(path)
+      expect(response.status).toBe(404)
+      expect(readSandboxArtifact).not.toHaveBeenCalled()
+    })
+
+    it('returns 404 when the file is missing or expired', async () => {
+      vi.mocked(prisma.agentMemorySession.findFirst).mockResolvedValueOnce({ sessionId } as never)
+      vi.mocked(readSandboxArtifact).mockResolvedValueOnce(undefined)
+      expect((await app.request(path)).status).toBe(404)
+    })
+
+    it('rejects an invalid file name', async () => {
+      const response = await app.request(`/api/sessions/${sessionId}/artifacts/.hidden`)
+      expect(response.status).toBe(400)
+      expect(readSandboxArtifact).not.toHaveBeenCalled()
+    })
+  })
 })

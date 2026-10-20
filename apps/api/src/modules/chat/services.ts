@@ -1,6 +1,6 @@
 import { agentToClientStream } from '@anvia/client'
 import { memoryStore, prisma } from '@ultrasakti/db'
-import { createAgent, getMcpConnection } from '@ultrasakti/runtime'
+import { createAgent, getMcpConnection, getSandboxToolset } from '@ultrasakti/runtime'
 
 export function findChatSession(sessionId: string, userId: string) {
   return prisma.agentMemorySession.findFirst({
@@ -46,16 +46,20 @@ function claimContinuation(interactionId: string, session: ChatSession) {
   return entry.continuation
 }
 
-async function createChatAgent() {
-  const mcp = await getMcpConnection()
+async function createChatAgent(session: ChatSession) {
+  const [mcp, sandbox] = await Promise.all([
+    getMcpConnection(),
+    getSandboxToolset(session.userId, session.sessionId),
+  ])
   return createAgent({
+    sandbox,
     memory: { store: memoryStore, savePolicy: 'turn' },
     mcpServers: mcp.servers,
   })
 }
 
 async function* streamAgentEvents(prompt: string, session: ChatSession, abortSignal?: AbortSignal) {
-  const agent = await createChatAgent()
+  const agent = await createChatAgent(session)
   for await (const event of agent.stream({ prompt, session, abortSignal })) {
     if (event.type === 'interaction') keepContinuation(event.continuation, session)
     yield event
@@ -69,7 +73,7 @@ async function* resumeAgentEvents(
   abortSignal?: AbortSignal,
 ) {
   const continuation = claimContinuation(interactionId, session)
-  const agent = await createChatAgent()
+  const agent = await createChatAgent(session)
   const outcome = await agent.resume(continuation, response, { abortSignal })
   if (outcome.type === 'interaction') keepContinuation(outcome.continuation, session)
   // `resume` returns only the final outcome, so surface its text the way streamed text arrives.

@@ -25,6 +25,7 @@ vi.mock('../auth/auth', () => ({
 
 vi.mock('@ultrasakti/runtime', () => ({
   getMcpConnection: vi.fn().mockResolvedValue({ servers: [] }),
+  getSandboxToolset: vi.fn().mockResolvedValue(undefined),
   createAgent: vi.fn(() => ({
     stream: vi.fn(async function* () {
       yield { type: 'text_delta', turn: 1, delta: 'Hello from the agent.' }

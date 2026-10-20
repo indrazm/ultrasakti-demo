@@ -1,10 +1,12 @@
 import { Agent, type AgentOptions } from '@anvia/core'
+import type { AnyTool } from '@anvia/core/tool'
 import { getModel } from './models.ts'
 import { getLensClient } from './observability.ts'
 import { defaultInstructions } from './prompts/default.ts'
 import { createWebSearchTools } from './tools/web-search/index.ts'
 
-export type CreateAgentOptions = Partial<AgentOptions>
+export type SandboxToolset = { tools: readonly AnyTool[]; instructions: string }
+export type CreateAgentOptions = Partial<AgentOptions> & { sandbox?: SandboxToolset }
 
 function getDefaultTools() {
   const apiKey = process.env.EXA_API_KEY
@@ -12,13 +14,15 @@ function getDefaultTools() {
   return Object.values(createWebSearchTools(apiKey))
 }
 
-export function createAgent(options: CreateAgentOptions = {}) {
+export function createAgent({ sandbox, ...options }: CreateAgentOptions = {}) {
   return new Agent({
     ...options,
     id: options.id ?? 'assistant',
     model: options.model ?? getModel(),
-    instructions: options.instructions ?? defaultInstructions,
-    tools: options.tools ?? getDefaultTools(),
+    instructions:
+      options.instructions ??
+      (sandbox ? `${defaultInstructions}\n\n${sandbox.instructions}` : defaultInstructions),
+    tools: options.tools ?? [...getDefaultTools(), ...(sandbox?.tools ?? [])],
     memory: options.memory,
     observability: options.observability ?? {
       observers: { lens: getLensClient().observer() },

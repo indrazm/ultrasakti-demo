@@ -11,10 +11,11 @@
     "eval:basic": "node --env-file=../../.env src/evals/run-basics.ts"
   },
   "dependencies": {
-    "@anvia/core": "^1.5.0",
+    "@anvia/core": "^1.17.0",
     "@anvia/lens": "^1.2.0",
     "@anvia/mcp": "^1.2.5",
     "@anvia/openai": "^1.1.7",
+    "@anvia/sandbox": "^1.2.1",
     "exa-js": "^2.23.0",
     "zod": "^4.6.5"
   },

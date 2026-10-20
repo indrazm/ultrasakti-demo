@@ -67,3 +67,31 @@ export async function getSession(userId: string, sessionId: string) {
   }))
   return { sessionId, messages: visibleMessages.filter((message) => message.parts.length > 0) }
 }
+
+const imageTypes: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+}
+const downloadTypes: Record<string, string> = {
+  csv: 'text/csv',
+  json: 'application/json',
+  txt: 'text/plain',
+  pdf: 'application/pdf',
+}
+
+export function artifactContentType(name: string) {
+  const extension = name.split('.').pop()?.toLowerCase() ?? ''
+  if (imageTypes[extension]) return { type: imageTypes[extension], inline: true }
+  return { type: downloadTypes[extension] ?? 'application/octet-stream', inline: false }
+}
+
+export function ownsSession(userId: string, sessionId: string) {
+  return prisma.agentMemorySession.findFirst({
+    where: { sessionId, userId },
+    select: { sessionId: true },
+  })
+}

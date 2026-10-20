@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { messagesToUIMessages } from '@anvia/client'
+import { messagesToUIMessages, type UIMessagePart } from '@anvia/client'
 import { createMemoryScopeKey, memoryStore, prisma } from '@ultrasakti/db'
 import type { SessionListInput } from './schema'
 
@@ -57,13 +57,21 @@ export async function getSession(userId: string, sessionId: string) {
   if (!session) return null
 
   const messages = await memoryStore.load({ scope: { sessionId, userId } })
-  // The chat UI exposes conversation text, not internal reasoning or tool payloads.
+  // The chat UI replays conversation text and which tools ran with what arguments, as the live
+  // stream shows them. Tool results, internal reasoning and system prompts stay server-side.
   const visibleMessages = messagesToUIMessages(
-    messages.filter((message) => message.role === 'user' || message.role === 'assistant'),
+    messages.filter((message) => message.role !== 'system'),
   ).map(({ id, role, parts }) => ({
     id,
     role,
-    parts: parts.filter((part) => part.type === 'text'),
+    parts: parts.flatMap((part): UIMessagePart[] => {
+      if (part.type === 'text') return [part]
+      if (part.type !== 'tool') return []
+      if (part.state === 'output-available') {
+        return [{ ...part, output: null, resultContent: undefined }]
+      }
+      return [part]
+    }),
   }))
   return { sessionId, messages: visibleMessages.filter((message) => message.parts.length > 0) }
 }

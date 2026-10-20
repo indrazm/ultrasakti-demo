@@ -121,6 +121,57 @@ describe('platform home page', () => {
     expect(screen.getByRole('textbox', { name: 'Message Atelier' })).toBeEnabled()
   })
 
+  it('replays saved tool calls as "toolname - summary"', async () => {
+    vi.mocked(loadSession).mockResolvedValueOnce(
+      messagesToUIMessages([
+        { role: 'user', content: 'Show draft orders' },
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call-1',
+              toolName: 'ultra-sakti-sales_list_orders',
+              input: { status: 'draft' },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call-1',
+              toolName: 'ultra-sakti-sales_list_orders',
+              output: { type: 'text', value: '[]' },
+            },
+          ],
+        },
+        { role: 'assistant', content: 'There are no draft orders.' },
+      ]),
+    )
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <ChatPage
+          activeSessionId="tool-session"
+          navigateToSession={vi.fn()}
+          user={{ id: 'test-user', name: 'Platform Tester', email: 'tester@example.com' }}
+          onSignOut={vi.fn()}
+          signOutPending={false}
+          signOutError=""
+        />
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByText(/ultra-sakti-sales_list_orders/)).toBeVisible()
+    expect(screen.getByText(/- status: draft/)).toBeVisible()
+    expect(screen.getByText('There are no draft orders.')).toBeVisible()
+    expect(screen.queryByRole('status', { name: 'Working' })).not.toBeInTheDocument()
+    // The tool step and the final text are one reply, so they share a single end mark.
+    expect(screen.getAllByTestId('end-of-reply')).toHaveLength(1)
+  })
+
   it('renders assistant replies as markdown', async () => {
     vi.mocked(loadSession).mockResolvedValueOnce(
       messagesToUIMessages([

@@ -1,4 +1,4 @@
-import { Asterisk, Plus } from 'lucide-react'
+import { Asterisk, LoaderCircle, Plus } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@ultrasakti/ui/components/avatar'
 import { Button } from '@ultrasakti/ui/components/button'
 import type { ChatSession } from '../types'
@@ -8,6 +8,7 @@ type ChatSidebarProps = {
   sessions: ChatSession[]
   activeSessionId: string | null
   activeTitle?: string
+  workingSessionId?: string | null
   onSelectSession: (sessionId: string) => void
   disabled: boolean
   loading: boolean
@@ -24,6 +25,7 @@ export function ChatSidebar({
   sessions,
   activeSessionId,
   activeTitle,
+  workingSessionId,
   onNewChat,
   onSelectSession,
   disabled,
@@ -79,11 +81,19 @@ export function ChatSidebar({
             aria-current={session.sessionId === activeSessionId ? 'page' : undefined}
             disabled={disabled}
             onClick={() => onSelectSession(session.sessionId)}
-            className="flex h-9 w-full items-center rounded-lg px-3 text-left text-sm text-[#3d3d3a] hover:bg-[#1f1e1d]/5 disabled:opacity-60 aria-[current=page]:bg-[#1f1e1d]/[0.07] aria-[current=page]:text-[#141413]"
+            className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[#3d3d3a] hover:bg-[#1f1e1d]/5 disabled:opacity-60 aria-[current=page]:bg-[#1f1e1d]/[0.07] aria-[current=page]:text-[#141413]"
           >
             <span className="truncate">
               {session.sessionId === activeSessionId && activeTitle ? activeTitle : session.title}
             </span>
+            {session.sessionId === workingSessionId && (
+              <LoaderCircle
+                size={14}
+                role="status"
+                aria-label="Working"
+                className="ml-auto shrink-0 animate-spin text-[#d97757]"
+              />
+            )}
           </button>
         ))}
         {hasMore && (

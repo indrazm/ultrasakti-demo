@@ -6,6 +6,8 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@ultrasakti/ui/co
 import { ApprovalPrompt } from './approval-prompt'
 import { artifactMarkdownComponents } from './artifact-markdown'
 import { ChatSidebar } from './chat-sidebar'
+import { ToolCall } from './tool-call'
+import { WorkingIndicator } from './working-indicator'
 import { useSessionChat } from '../hooks/use-session-chat'
 import type { SessionNavigation } from '../types'
 
@@ -49,6 +51,16 @@ export function ChatPage({
     setDraft('')
     setSidebarOpen(false)
   }, [activeSessionId])
+  const working = chat.status === 'submitted' || chat.status === 'streaming'
+  // One assistant turn is stored as several messages (a tool step each); mark only the last.
+  const endsAssistantRun = new Set(
+    chat.messages
+      .filter(
+        (message, index) =>
+          message.role === 'assistant' && chat.messages[index + 1]?.role !== 'assistant',
+      )
+      .map((message) => message.id),
+  )
   const title = activeSessionId
     ? chat.messages
         .find((message) => message.role === 'user')
@@ -75,6 +87,7 @@ export function ChatPage({
       sessions={sessions.data?.pages.flatMap((page) => page.sessions) ?? []}
       activeSessionId={activeSessionId}
       activeTitle={title}
+      workingSessionId={working ? activeSessionId : null}
       onNewChat={newChat}
       onSelectSession={selectSession}
       disabled={busy}
@@ -185,20 +198,24 @@ export function ChatPage({
                           {message.role === 'assistant' && <p className="sr-only">Atelier</p>}
                           {message.role === 'assistant' ? (
                             <MessagePrimitive.Parts>
-                              {(part) =>
-                                part.type === 'text' ? (
-                                  <MessagePrimitive.Markdown
-                                    components={artifactMarkdownComponents}
-                                  />
-                                ) : null
-                              }
+                              {(part) => {
+                                if (part.type === 'text') {
+                                  return (
+                                    <MessagePrimitive.Markdown
+                                      components={artifactMarkdownComponents}
+                                    />
+                                  )
+                                }
+                                return part.type === 'tool' ? <ToolCall part={part} /> : null
+                              }}
                             </MessagePrimitive.Parts>
                           ) : (
                             <MessagePrimitive.Parts filter={(part) => part.type === 'text'} />
                           )}
                         </MessagePrimitive.Content>
-                        {message.role === 'assistant' && (
+                        {endsAssistantRun.has(message.id) && (
                           <Asterisk
+                            data-testid="end-of-reply"
                             size={22}
                             strokeWidth={2.5}
                             aria-hidden
@@ -223,9 +240,7 @@ export function ChatPage({
                     />
                   ) : null,
                 )}
-                <ThreadPrimitive.Loading role="status" className="px-1 text-sm text-[#73726c]">
-                  Atelier is thinking…
-                </ThreadPrimitive.Loading>
+                {working && <WorkingIndicator />}
                 <ThreadPrimitive.Error role="alert" className="px-1 text-sm text-destructive">
                   Could not get a response. Please try again.
                 </ThreadPrimitive.Error>

@@ -128,11 +128,6 @@ export function ChatPage({
               </Button>
             </div>
           </header>
-          {loadingHistory && (
-            <p role="status" className="px-5 py-3 text-sm text-[#73726c]">
-              Loading conversation…
-            </p>
-          )}
           {historyError && (
             <div role="alert" className="px-5 py-3 text-sm text-destructive">
               {historyError}
@@ -142,6 +137,9 @@ export function ChatPage({
             </div>
           )}
           <ThreadPrimitive.Root
+            role="region"
+            aria-label="Conversation"
+            aria-busy={loadingHistory}
             className={`flex min-h-0 flex-1 flex-col ${empty ? 'justify-center pb-[8vh]' : ''}`}
           >
             <ThreadPrimitive.Viewport

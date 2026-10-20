@@ -35,17 +35,19 @@ export function ChatSidebar({
   onLoadMore,
 }: ChatSidebarProps) {
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#f3f3f0] text-[#242725]">
+    <div className="flex h-full min-h-0 flex-col bg-[#f5f4ee] text-[#141413]">
       <div className="flex items-center gap-2.5 px-5 pb-5 pt-5">
-        <span className="flex size-8 items-center justify-center rounded-xl bg-[#d7e6d7] text-[#356747]">
+        <span className="flex size-8 items-center justify-center text-[#d97757]">
           <Sparkles size={17} />
         </span>
-        <span className="text-[17px] font-semibold tracking-tight">atelier</span>
+        <span className="font-[ui-serif,Georgia,Cambria,'Times_New_Roman',serif] text-[20px] tracking-tight">
+          atelier
+        </span>
       </div>
       <div className="px-3">
         <Button
           variant="ghost"
-          className="h-10 w-full justify-start gap-3 px-3 hover:bg-[#e9eae5]"
+          className="h-10 w-full justify-start gap-3 px-3 hover:bg-[#eceae0]"
           onClick={onNewChat}
           disabled={disabled}
         >
@@ -53,7 +55,7 @@ export function ChatSidebar({
         </Button>
       </div>
       <nav aria-label="Conversations" className="mt-9 min-h-0 flex-1 overflow-y-auto px-3">
-        <p className="px-3 pb-2 text-xs font-semibold text-[#8b908b]">Conversations</p>
+        <p className="px-3 pb-2 text-xs font-medium text-[#73726c]">Conversations</p>
         {loading && (
           <p role="status" className="px-3 py-2 text-sm">
             Loading conversations…
@@ -68,7 +70,7 @@ export function ChatSidebar({
           </div>
         )}
         {!loading && !error && sessions.length === 0 && (
-          <p className="px-3 py-2 text-sm text-[#8b908b]">No conversations yet</p>
+          <p className="px-3 py-2 text-sm text-[#73726c]">No conversations yet</p>
         )}
         {sessions.map((session) => (
           <button
@@ -76,7 +78,7 @@ export function ChatSidebar({
             aria-current={session.sessionId === activeSessionId ? 'page' : undefined}
             disabled={disabled}
             onClick={() => onSelectSession(session.sessionId)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-[#e9eae5] disabled:opacity-60 ${session.sessionId === activeSessionId ? 'bg-[#e5e9e1]' : ''}`}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-[#eceae0] disabled:opacity-60 ${session.sessionId === activeSessionId ? 'bg-[#eceae0]' : ''}`}
           >
             <MessageSquare size={16} className="shrink-0" />
             <span className="truncate">
@@ -90,16 +92,16 @@ export function ChatSidebar({
           </Button>
         )}
       </nav>
-      <div className="border-t border-[#e6e7e2] p-3">
+      <div className="border-t border-[#e8e6dc] p-3">
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
           <Avatar className="size-9">
-            <AvatarFallback className="bg-[#e5ddd1] text-xs font-semibold text-[#6d5d4a]">
+            <AvatarFallback className="bg-[#d97757] text-xs font-medium text-white">
               {user.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-semibold">{user.name}</p>
-            <p className="max-w-[180px] truncate text-xs text-[#888e88]">{user.email}</p>
+            <p className="text-sm font-medium">{user.name}</p>
+            <p className="max-w-[180px] truncate text-xs text-[#73726c]">{user.email}</p>
           </div>
         </div>
       </div>

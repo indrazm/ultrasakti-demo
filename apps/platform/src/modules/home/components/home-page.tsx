@@ -77,7 +77,7 @@ export function HomePage(sessionNavigation: SessionNavigation) {
             <span className="mb-6 inline-flex rounded-full border border-ring bg-secondary px-3 py-1 text-xs font-medium tracking-wide text-secondary-foreground">
               YOUR WORKSPACE
             </span>
-            <h1 className="text-5xl font-semibold leading-[1.1] tracking-[-0.05em] sm:text-6xl">
+            <h1 className="font-[ui-serif,Georgia,Cambria,'Times_New_Roman',serif] text-5xl font-normal leading-[1.1] tracking-[-0.03em] sm:text-6xl">
               A better place to get things done.
             </h1>
             <p className="mt-7 max-w-md text-lg leading-relaxed text-muted-foreground">
@@ -93,7 +93,7 @@ export function HomePage(sessionNavigation: SessionNavigation) {
           </div>
 
           <section
-            className="rounded-3xl border border-input bg-card p-8 shadow-[0_24px_80px_-40px_rgba(29,57,39,0.3)] sm:p-10"
+            className="rounded-3xl border border-input bg-card p-8 shadow-[0_8px_40px_-16px_rgba(20,20,19,0.15)] sm:p-10"
             aria-label="Account"
           >
             {sessionPending ? (

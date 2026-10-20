@@ -1,17 +1,17 @@
 .platform-theme {
-  --background: #f4f3ef;
-  --foreground: #202b25;
+  --background: #faf9f5;
+  --foreground: #141413;
   --card: #ffffff;
-  --card-foreground: #202b25;
-  --primary: #1e563c;
+  --card-foreground: #141413;
+  --primary: #c96442;
   --primary-foreground: #ffffff;
-  --secondary: #e4f0e4;
-  --secondary-foreground: #286747;
-  --muted: #f2f5f1;
-  --muted-foreground: #65736b;
-  --accent: #dcebdc;
-  --accent-foreground: #24613e;
-  --border: #d8ddd5;
-  --input: #e1e6df;
-  --ring: #bfd3c4;
+  --secondary: #f0eee6;
+  --secondary-foreground: #3d3d3a;
+  --muted: #f0eee6;
+  --muted-foreground: #73726c;
+  --accent: #f0eee6;
+  --accent-foreground: #3d3d3a;
+  --border: #e8e6dc;
+  --input: #e0ded3;
+  --ring: #d1cfc5;
 }

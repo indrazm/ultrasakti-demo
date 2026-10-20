@@ -1,4 +1,4 @@
-import { MessageSquare, Plus, Sparkles } from 'lucide-react'
+import { Asterisk, Plus } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@ultrasakti/ui/components/avatar'
 import { Button } from '@ultrasakti/ui/components/button'
 import type { ChatSession } from '../types'
@@ -35,29 +35,30 @@ export function ChatSidebar({
   onLoadMore,
 }: ChatSidebarProps) {
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#f5f4ee] text-[#141413]">
-      <div className="flex items-center gap-2.5 px-5 pb-5 pt-5">
-        <span className="flex size-8 items-center justify-center text-[#d97757]">
-          <Sparkles size={17} />
-        </span>
-        <span className="font-[ui-serif,Georgia,Cambria,'Times_New_Roman',serif] text-[20px] tracking-tight">
+    <div className="flex h-full min-h-0 flex-col bg-[#f5f4ed] text-[#141413]">
+      <div className="flex h-12 items-center gap-2 px-5 pt-2">
+        <Asterisk size={22} strokeWidth={2.5} className="text-[#d97757]" />
+        <span className="font-[ui-serif,Georgia,Cambria,'Times_New_Roman',serif] text-[22px] tracking-tight">
           atelier
         </span>
       </div>
-      <div className="px-3">
-        <Button
-          variant="ghost"
-          className="h-10 w-full justify-start gap-3 px-3 hover:bg-[#eceae0]"
+      <div className="mt-3 px-2">
+        <button
+          type="button"
+          className="flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-sm font-medium hover:bg-[#1f1e1d]/5 disabled:opacity-60"
           onClick={onNewChat}
           disabled={disabled}
         >
-          <Plus size={18} /> New chat
-        </Button>
+          <span className="flex size-6 items-center justify-center rounded-full bg-[#c96442] text-white">
+            <Plus size={15} strokeWidth={2.5} />
+          </span>
+          New chat
+        </button>
       </div>
-      <nav aria-label="Conversations" className="mt-9 min-h-0 flex-1 overflow-y-auto px-3">
-        <p className="px-3 pb-2 text-xs font-medium text-[#73726c]">Conversations</p>
+      <nav aria-label="Conversations" className="mt-5 min-h-0 flex-1 overflow-y-auto px-2">
+        <p className="px-3 pb-1.5 text-xs font-medium text-[#73726c]">Conversations</p>
         {loading && (
-          <p role="status" className="px-3 py-2 text-sm">
+          <p role="status" className="px-3 py-2 text-sm text-[#73726c]">
             Loading conversations…
           </p>
         )}
@@ -78,29 +79,33 @@ export function ChatSidebar({
             aria-current={session.sessionId === activeSessionId ? 'page' : undefined}
             disabled={disabled}
             onClick={() => onSelectSession(session.sessionId)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-[#eceae0] disabled:opacity-60 ${session.sessionId === activeSessionId ? 'bg-[#eceae0]' : ''}`}
+            className="flex h-9 w-full items-center rounded-lg px-3 text-left text-sm text-[#3d3d3a] hover:bg-[#1f1e1d]/5 disabled:opacity-60 aria-[current=page]:bg-[#1f1e1d]/[0.07] aria-[current=page]:text-[#141413]"
           >
-            <MessageSquare size={16} className="shrink-0" />
             <span className="truncate">
               {session.sessionId === activeSessionId && activeTitle ? activeTitle : session.title}
             </span>
           </button>
         ))}
         {hasMore && (
-          <Button variant="ghost" className="w-full" disabled={loadingMore} onClick={onLoadMore}>
+          <Button
+            variant="ghost"
+            className="w-full text-[#73726c] hover:bg-[#1f1e1d]/5"
+            disabled={loadingMore}
+            onClick={onLoadMore}
+          >
             Load more
           </Button>
         )}
       </nav>
-      <div className="border-t border-[#e8e6dc] p-3">
-        <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-          <Avatar className="size-9">
-            <AvatarFallback className="bg-[#d97757] text-xs font-medium text-white">
+      <div className="border-t border-[#1f1e1d]/10 p-2">
+        <div className="flex items-center gap-3 rounded-lg px-2 py-2">
+          <Avatar className="size-8">
+            <AvatarFallback className="bg-[#141413] text-xs font-medium text-white">
               {user.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <p className="text-sm font-medium">{user.name}</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="max-w-[180px] truncate text-xs text-[#73726c]">{user.email}</p>
           </div>
         </div>

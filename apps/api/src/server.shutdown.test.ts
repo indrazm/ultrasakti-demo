@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
-const { closeServer, closeObservability } = vi.hoisted(() => ({
+const { closeServer, closeObservability, disconnectDatabase } = vi.hoisted(() => ({
   closeServer: vi.fn(),
   closeObservability: vi.fn(),
+  disconnectDatabase: vi.fn(),
 }))
 
 vi.mock('@hono/node-server', () => ({ serve: () => ({ close: closeServer }) }))
 vi.mock('@ultrasakti/runtime', () => ({ closeRuntimeObservability: closeObservability }))
+vi.mock('@ultrasakti/db', () => ({ prisma: { $disconnect: disconnectDatabase } }))
 vi.mock('./modules/auth/auth', () => ({
   auth: { handler: vi.fn() },
   platformOrigin: 'http://localhost:5173',
@@ -28,13 +30,14 @@ beforeEach(async () => {
   vi.stubEnv('VITEST', '')
   closeServer.mockReset()
   closeObservability.mockReset().mockResolvedValue(undefined)
+  disconnectDatabase.mockReset().mockResolvedValue(undefined)
   vi.spyOn(process, 'once').mockImplementation((signal, listener) => {
     signals.set(signal, listener)
     return process
   })
   vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
   vi.spyOn(console, 'error').mockImplementation(() => {})
-  await import('./index')
+  await import('./server')
 })
 
 afterEach(() => {
@@ -49,10 +52,12 @@ it('drains HTTP requests before closing telemetry and handles repeated signals o
   signals.get('SIGINT')!()
   expect(closeServer).toHaveBeenCalledTimes(1)
   expect(closeObservability).not.toHaveBeenCalled()
+  expect(disconnectDatabase).not.toHaveBeenCalled()
   expect(process.exit).not.toHaveBeenCalled()
 
   await closeServer.mock.calls[0][0]()
   expect(closeObservability).toHaveBeenCalledTimes(1)
+  expect(disconnectDatabase).toHaveBeenCalledTimes(1)
   expect(process.exit).toHaveBeenCalledWith(0)
   expect(vi.getTimerCount()).toBe(0)
 })

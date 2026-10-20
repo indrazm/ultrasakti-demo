@@ -1,49 +1,58 @@
 # CI and production deployment
 
-`.github/workflows/ci-cd.yml` runs lint, tests, and build on pull requests and pushes to `main`. The test job creates an isolated PostgreSQL database, generates Prisma Client, and applies migrations so the memory integration test runs. Successful main runs deploy the same commit; pull requests never deploy. A manual workflow run on main also runs CI before deployment.
+Ultra Sakti runs in PM2 on `ubuntu-wsl`. One Hono process serves the API and built platform. `compose.yml` runs only PostgreSQL and Redis, using the existing `ultrasakti_postgres_data` and `ultrasakti_redis_data` volumes and loopback ports 5432/6379. Lens is a separate Docker deployment.
 
-The `production` GitHub environment allows only the `main` branch and contains:
+The app is served at `https://ubuntu-wsl.tail9a7b40.ts.net` through Tailscale Serve. The host root environment is `~/work/ultrasakti/source/.env` (mode 600). Set `PORT=8082`, `DATABASE_URL` and `REDIS_URL` to the loopback database endpoints, and `VITE_API_URL`, `BETTER_AUTH_URL` and `PLATFORM_ORIGIN` to the app HTTPS origin. Keep the existing database password and auth/provider credentials. `ANVIA_LENS_BASE_URL` is `https://ubuntu-wsl.tail9a7b40.ts.net:8443`; Lens keys stay in the same protected environment.
 
-| Kind     | Name                 | Purpose                                                              |
-| -------- | -------------------- | -------------------------------------------------------------------- |
-| Variable | `DEPLOY_HOST`        | Existing public SSH endpoint of the app server                       |
-| Variable | `DEPLOY_USER`        | Dedicated `ultrasakti-deploy` server account                         |
-| Secret   | `DEPLOY_SSH_KEY`     | Dedicated private key, restricted to the deployment command          |
-| Secret   | `DEPLOY_KNOWN_HOSTS` | SSH host key verified through the existing trusted server connection |
+## Host setup
 
-Application credentials stay in `/opt/app/source/.env` on the server. This is the original root environment file; it is not copied into release archives, images, or GitHub. The application remains available at `https://app.tail9a7b40.ts.net` through Tailscale Serve.
+Use Node 26, pnpm 12.4.2 and PM2 7.0.4. Install pnpm with the host's Node package manager, then install PM2 with `PNPM_HOME="$HOME/.local/share/pnpm" pnpm add -g pm2@7.0.4`. Include that directory and the Node binary directory in the user's PATH. Do not run the application or helper as root.
 
-## Server layout and operation
+The host layout is:
 
-- `/opt/app/deploy/`: installed Docker configuration, release pointer, and deployment lock.
-- `/opt/app/repository.git`: public repository fetched by the deployment helper.
-- `/opt/app/releases/<sha>.<suffix>/`: source snapshot, build context, candidate release settings, and `previous.env` for rollback.
-- `/opt/app/backups/`: protected PostgreSQL backups taken before migrations.
-- `/usr/local/sbin/ultrasakti-deploy`: root-owned installed copy of `deploy.sh`.
-- `/usr/local/bin/ultrasakti-deploy-command`: root-owned installed copy of `ssh-command.sh`.
+- `~/work/ultrasakti/deploy/`: reviewed, installed `compose.yml`, `deploy.sh`, `ssh-command.sh`, deployment lock and `current-sha`.
+- `source/.env`: persistent root environment, linked from each release.
+- `repository.git`: public repository cache.
+- `releases/<sha>.<suffix>/`: immutable source and build output, plus `previous-release` after activation.
+- `current`: symlink to the active release.
+- `backups/`: protected PostgreSQL dumps retained before migrations.
 
-The dedicated account has no general sudo access. Its authorized key uses `restrict` and the forced SSH command. The helper accepts only a full SHA matching the repository's current main tip, builds commit-tagged images, backs up the database, runs migrations, and replaces only the API and web containers. PostgreSQL, Redis, Tailscale, and monitoring keep running.
+An operator must install changes to the scripts and Compose file explicitly. Validate Bash syntax and `docker compose --env-file source/.env -f deploy/compose.yml config --quiet` first. Preserve the project name, volumes and root environment. After preparing the first release with `pnpm install --frozen-lockfile` and `pnpm build`, link its root `.env`, run migrations, create `current`, and start its `deploy/ecosystem.config.cjs` with PM2. Then run `deploy/install-pm2-service.sh` as the app user. The installer saves PM2 state, restarts its daemon under user systemd and enables resurrection. Lingering must be enabled for that user (`loginctl show-user "$USER" -p Linger`). WSL itself must remain running.
 
-Inspect the active deployment:
+Configure Serve with `tailscale serve --bg http://127.0.0.1:8082`. Its existing HTTPS port 8443 route for Lens remains configured. The app listens on loopback in production. PM2 reads the root environment through Node's `--env-file` argument, and flushes HTTP requests, telemetry and Prisma on shutdown.
+
+## GitHub Actions
+
+Pull requests run lint, database-backed tests, build and the production runtime smoke check. Main pushes and manual main runs deploy after CI. The `production` environment allows only `main` and contains:
+
+| Kind     | Name                 | Purpose                                              |
+| -------- | -------------------- | ---------------------------------------------------- |
+| Variable | `DEPLOY_HOST`        | `ubuntu-wsl.tail9a7b40.ts.net`                       |
+| Variable | `DEPLOY_USER`        | `indrazm`                                            |
+| Secret   | `TS_OAUTH_CLIENT_ID` | Tailscale OAuth client for Auth Keys write, `tag:ci` |
+| Secret   | `TS_OAUTH_SECRET`    | OAuth client secret                                  |
+| Secret   | `DEPLOY_SSH_KEY`     | Dedicated key restricted to the deployment command   |
+| Secret   | `DEPLOY_KNOWN_HOSTS` | Host key verified over the trusted SSH connection    |
+
+The ephemeral runner joins as `tag:ci`. Tailnet policy must permit that tag to reach SSH and HTTPS on the host; the current tailnet uses its existing allow-all policy. Its SSH authorized key uses `restrict,command="/home/indrazm/work/ultrasakti/deploy/ssh-command.sh"`. The wrapper permits only `deploy <40-character-sha>`; the helper independently rejects anything except the current main tip. It does not run CI itself, so manual operators must verify checks first. No sudo rule is needed. The account's Docker membership grants privileged host access; the forced key is a command restriction, not an OS sandbox.
+
+## Operations and recovery
 
 ```sh
-ssh indrazm@app
-cd /opt/app
-sudo docker compose --env-file source/.env --env-file deploy/release.env -f deploy/compose.yml ps
-sudo cat deploy/current-sha
-curl --fail https://app.tail9a7b40.ts.net/api/health
+ssh ubuntu-wsl
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
+cd ~/work/ultrasakti
+pm2 status
+pm2 logs ultrasakti --lines 50
+systemctl --user status pm2-ultrasakti
+cat deploy/current-sha
+docker compose --project-name ultrasakti --env-file source/.env -f deploy/compose.yml ps
+curl --fail https://ubuntu-wsl.tail9a7b40.ts.net/api/health
 ```
 
-An authorized operator can deploy main manually with `sudo /usr/local/sbin/ultrasakti-deploy <full-main-sha>`. Repeating a healthy current release is a no-op. The helper does not itself run CI; the workflow supplies that gate, and a manual operator must verify checks first.
+Deploy main manually with `~/work/ultrasakti/deploy/deploy.sh <full-main-sha>`. Repeating a healthy current release is a no-op. Builds and migrations happen before PM2 restarts. Activation failures restore the previous release and saved PM2 state. Database migrations are never reversed automatically; schema changes must support the prior app or include a reviewed recovery plan.
 
-## Deployment configuration updates
+For a manual rollback, read `previous-release` in the failed release, atomically repoint `current` to it, run `pm2 startOrRestart <previous-release>/deploy/ecosystem.config.cjs --update-env`, verify health, run `pm2 save`, and restore `deploy/current-sha` to the previous SHA. A database restore is a separate operator decision because it can discard later writes. Never use `down -v` or reset PostgreSQL.
 
-These files version the existing server configuration; application deployments do not install privileged helper changes from the repository. An operator must review and explicitly copy updated `Dockerfile`, `nginx.conf`, `compose.yml`, and `context.dockerignore` into `/opt/app/deploy`, then install the two scripts at the paths above as root-owned mode 755 files. Validate Bash syntax and Compose configuration before installing changes. Keep the existing `.env`, `release.env`, database volumes, monitoring configuration, and restricted sudo rule intact.
-
-## Recovery
-
-If activation or health checks fail, the helper starts the previous images again and restores `release.env`. Database migrations are not automatically reversed. Review schema compatibility before deployment; a backup restore is a separate operator decision because it can discard writes made after the backup.
-
-For a manual image rollback, use the failing release's `previous.env` as the second `--env-file`, run `up -d --no-deps --wait api web`, and copy that file back to `/opt/app/deploy/release.env` after verifying health. The release environment file is the authoritative image pointer. Do not use `down -v` or reset PostgreSQL.
-
-Source snapshots, old images, and database backups are retained for recovery. Their cleanup and off-host backup are operator responsibilities. Build output and deployment errors appear in the GitHub Actions job; application logs and host metrics remain available in Grafana.
+PM2 logs are under `~/.pm2/logs`; monitor their size and rotate them as part of host maintenance. Source releases, Docker images from the migration and protected backups are retained for recovery. Their cleanup and off-host backups remain operator responsibilities.

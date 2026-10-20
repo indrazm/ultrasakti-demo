@@ -120,4 +120,33 @@ describe('platform home page', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: 'Message Atelier' })).toBeEnabled()
   })
+
+  it('renders assistant replies as markdown', async () => {
+    vi.mocked(loadSession).mockResolvedValueOnce(
+      messagesToUIMessages([
+        { role: 'user', content: 'Latest orders' },
+        {
+          role: 'assistant',
+          content: '**Latest** orders:\n\n| Order | Status |\n|---|---|\n| SO-1 | Draft |',
+        },
+      ]),
+    )
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <ChatPage
+          activeSessionId="markdown-session"
+          navigateToSession={vi.fn()}
+          user={{ id: 'test-user', name: 'Platform Tester', email: 'tester@example.com' }}
+          onSignOut={vi.fn()}
+          signOutPending={false}
+          signOutError=""
+        />
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByRole('table')).toBeVisible()
+    expect(screen.getByRole('columnheader', { name: 'Status' })).toBeVisible()
+    expect(screen.getByText('Latest', { selector: 'strong' })).toBeVisible()
+  })
 })

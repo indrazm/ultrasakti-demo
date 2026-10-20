@@ -21,7 +21,17 @@ chatRoutes.post('/', zValidator('json', chatRequestSchema), async (c) => {
       return c.json({ error: 'Session not found' }, 404)
     }
     return createClientStreamResponse({
-      events: streamChat(body.messages[0].content, { sessionId, userId }, c.req.raw.signal),
+      events: streamChat(
+        body.type === 'messages'
+          ? { type: 'messages', prompt: body.messages[0].content }
+          : {
+              type: 'interaction_response',
+              interactionId: body.interactionId,
+              response: body.response,
+            },
+        { sessionId, userId },
+        c.req.raw.signal,
+      ),
       format: 'jsonl',
     })
   } catch {

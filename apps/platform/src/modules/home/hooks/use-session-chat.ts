@@ -31,7 +31,22 @@ export function useSessionChat(
   const transport = useMemo<ClientTransport>(
     () => ({
       async *send(options) {
-        if (options.request.type !== 'messages') throw new Error('Unsupported request')
+        if (options.request.type === 'interaction_response') {
+          const sessionId = sessionIdRef.current
+          if (!sessionId) throw new Error('A session is required')
+          const { interactionId, response } = options.request
+          yield* httpTransport.send({
+            ...options,
+            request: {
+              type: 'interaction_response',
+              interactionId,
+              response,
+              metadata: { sessionId },
+            },
+          })
+          void queryClient.invalidateQueries({ queryKey: ['session', userId, sessionId] })
+          return
+        }
         const lastMessage = options.request.messages.at(-1)
         if (!lastMessage || lastMessage.role !== 'user') throw new Error('A message is required')
         options.abortSignal?.throwIfAborted()

@@ -51,9 +51,9 @@ docker compose --project-name ultrasakti --env-file source/.env -f deploy/compos
 curl --fail https://ubuntu-wsl.tail9a7b40.ts.net/api/health
 ```
 
-Deploy main manually with `~/work/ultrasakti/deploy/deploy.sh <full-main-sha>`. Repeating a healthy current release is a no-op. Builds and migrations happen before PM2 restarts. Activation failures restore the previous release and saved PM2 state. Database migrations are never reversed automatically; schema changes must support the prior app or include a reviewed recovery plan.
+Deploy main manually with `~/work/ultrasakti/deploy/deploy.sh <full-main-sha>`. Repeating a healthy current release is a no-op. Builds and migrations happen before PM2 activation. Activation deletes and recreates the named process so PM2 uses the new release path, then verifies its script path and health. Activation failures restore the previous release and saved PM2 state. Database migrations are never reversed automatically; schema changes must support the prior app or include a reviewed recovery plan.
 
-For a manual rollback, read `previous-release` in the failed release, atomically repoint `current` to it, run `pm2 startOrRestart <previous-release>/deploy/ecosystem.config.cjs --update-env`, verify health, run `pm2 save`, and restore `deploy/current-sha` to the previous SHA. A database restore is a separate operator decision because it can discard later writes. Never use `down -v` or reset PostgreSQL.
+For a manual rollback, read `previous-release` in the failed release, atomically repoint `current` to it, run `pm2 delete ultrasakti` followed by `pm2 start <previous-release>/deploy/ecosystem.config.cjs`, verify health, run `pm2 save`, and restore `deploy/current-sha` to the previous SHA. A database restore is a separate operator decision because it can discard later writes. Never use `down -v` or reset PostgreSQL.
 
 PM2 logs are under `~/.pm2/logs`; monitor their size and rotate them as part of host maintenance. Source releases, Docker images from the migration and protected backups are retained for recovery. Their cleanup and off-host backups remain operator responsibilities.
 

@@ -16,6 +16,8 @@ repository=$app_dir/repository.git
 exec 9>"$deploy_dir/deploy.lock"
 flock -n 9 || { echo 'Another deployment is running.' >&2; exit 1; }
 test -f "$env_file"
+test -f "$app_dir/current/deploy/ecosystem.config.cjs"
+pm2 describe ultrasakti >/dev/null
 
 if [[ ! -d $repository ]]; then
   git init --bare "$repository"
@@ -61,7 +63,8 @@ on_error() {
     echo 'Activation failed; restoring the previous PM2 release.' >&2
     ln -sfn "$previous" "$app_dir/current.next"
     mv -Tf "$app_dir/current.next" "$app_dir/current"
-    pm2 startOrRestart "$previous/deploy/ecosystem.config.cjs" --update-env && pm2 save || \
+    pm2 delete ultrasakti || true
+    pm2 start "$previous/deploy/ecosystem.config.cjs" && pm2 save || \
       echo 'Automatic rollback failed; inspect PM2 immediately.' >&2
     echo 'Database migrations are not reversed; the backup is retained.' >&2
   fi
@@ -71,7 +74,17 @@ trap on_error ERR
 rollback_needed=true
 ln -sfn "$release_dir" "$app_dir/current.next"
 mv -Tf "$app_dir/current.next" "$app_dir/current"
-pm2 startOrRestart "$release_dir/deploy/ecosystem.config.cjs" --update-env
+pm2 delete ultrasakti
+pm2 start "$release_dir/deploy/ecosystem.config.cjs"
+pm2 jlist | node -e '
+  let input = "";
+  process.stdin.on("data", chunk => input += chunk);
+  process.stdin.on("end", () => {
+    const app = JSON.parse(input).find(item => item.name === "ultrasakti");
+    const cwd = `${process.argv[1]}/apps/api`;
+    if (app?.pm2_env.pm_cwd !== cwd || app?.pm2_env.pm_exec_path !== `${cwd}/src/server.ts` || app?.pm2_env.status !== "online") process.exit(1);
+  });
+' "$release_dir"
 for url in "http://127.0.0.1:$port/" "http://127.0.0.1:$port/api/health" "$origin/api/health"; do
   curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors \
     --connect-timeout 5 --max-time 15 --output /dev/null "$url"

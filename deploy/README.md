@@ -56,3 +56,5 @@ Deploy main manually with `~/work/ultrasakti/deploy/deploy.sh <full-main-sha>`. 
 For a manual rollback, read `previous-release` in the failed release, atomically repoint `current` to it, run `pm2 startOrRestart <previous-release>/deploy/ecosystem.config.cjs --update-env`, verify health, run `pm2 save`, and restore `deploy/current-sha` to the previous SHA. A database restore is a separate operator decision because it can discard later writes. Never use `down -v` or reset PostgreSQL.
 
 PM2 logs are under `~/.pm2/logs`; monitor their size and rotate them as part of host maintenance. Source releases, Docker images from the migration and protected backups are retained for recovery. Their cleanup and off-host backups remain operator responsibilities.
+
+Production smoke captures: [desktop chat](../docs/screenshots/pm2-production-chat.png) and [mobile chat](../docs/screenshots/pm2-production-mobile.png). These use a synthetic deployment test account.

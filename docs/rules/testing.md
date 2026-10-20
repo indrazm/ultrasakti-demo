@@ -2,6 +2,7 @@
 
 Use Vitest for unit and component tests in each app. Put tests beside the source they exercise using `*.test.ts` or `*.test.tsx` filenames. Use the app package's `test` script for a one-time run and `test:watch` while developing.
 
+- `packages/runtime` uses Node's built-in test runner (`node --test`, files `*.test.ts` beside the source) so it needs no test-framework dependency.
 - API tests run in Node and should exercise Hono routes with `app.request()`.
 - Admin and platform component tests run in jsdom with Testing Library. Prefer accessible queries such as `getByRole`.
 - Use Playwright for behavior that needs a real browser or crosses route, server, and rendering boundaries. Keep E2E tests in root `tests/e2e/`.

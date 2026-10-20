@@ -23,3 +23,4 @@ This directory records durable repository choices and their history. Follow [rul
 | [0017](./0017-pm2-runtime-deployment.md)       | PM2 runtime and tailnet deployment        | Accepted   |
 | [0018](./0018-runtime-mcp-and-sandbox.md)      | Runtime MCP servers and Docker sandbox    | Accepted   |
 | [0019](./0019-replay-tool-calls-in-history.md) | Replay tool calls in conversation history | Accepted   |
+| [0020](./0020-large-tool-output-gate.md)       | Large tool output gate                    | Accepted   |

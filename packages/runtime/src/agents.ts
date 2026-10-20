@@ -1,11 +1,15 @@
-import { Agent, type AgentOptions } from '@anvia/core'
+import { Agent, type AgentMiddleware, type AgentOptions } from '@anvia/core'
 import type { AnyTool } from '@anvia/core/tool'
 import { getModel } from './models.ts'
 import { getLensClient } from './observability.ts'
 import { defaultInstructions } from './prompts/default.ts'
 import { createWebSearchTools } from './tools/web-search/index.ts'
 
-export type SandboxToolset = { tools: readonly AnyTool[]; instructions: string }
+export type SandboxToolset = {
+  tools: readonly AnyTool[]
+  instructions: string
+  middlewares: readonly AgentMiddleware[]
+}
 export type CreateAgentOptions = Partial<AgentOptions> & { sandbox?: SandboxToolset }
 
 function getDefaultTools() {
@@ -22,6 +26,7 @@ export function createAgent({ sandbox, ...options }: CreateAgentOptions = {}) {
     instructions:
       options.instructions ??
       (sandbox ? `${defaultInstructions}\n\n${sandbox.instructions}` : defaultInstructions),
+    middlewares: [...(options.middlewares ?? []), ...(sandbox?.middlewares ?? [])],
     tools: options.tools ?? [...getDefaultTools(), ...(sandbox?.tools ?? [])],
     memory: options.memory,
     observability: options.observability ?? {

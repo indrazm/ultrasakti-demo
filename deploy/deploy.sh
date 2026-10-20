@@ -43,7 +43,7 @@ git --git-dir="$repository" archive "$sha" | tar --same-permissions -xf - -C "$r
 ln -s "$env_file" "$release_dir/.env"
 cd "$release_dir"
 HUSKY=0 pnpm install --frozen-lockfile
-pnpm build
+./node_modules/.bin/dotenv -e "$env_file" -- pnpm build
 compose up -d --wait --wait-timeout 120 postgres redis
 backup=$app_dir/backups/$(date -u +%Y%m%dT%H%M%SZ)-$sha.dump
 compose exec -T postgres pg_dump -U "$(node --env-file="$env_file" -p 'process.env.POSTGRES_USER')" \

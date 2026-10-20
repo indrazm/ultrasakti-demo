@@ -24,6 +24,7 @@ vi.mock('../auth/auth', () => ({
 }))
 
 vi.mock('@ultrasakti/runtime', () => ({
+  getMcpConnection: vi.fn().mockResolvedValue({ servers: [] }),
   createAgent: vi.fn(() => ({
     stream: vi.fn(async function* () {
       yield { type: 'text_delta', turn: 1, delta: 'Hello from the agent.' }
@@ -72,7 +73,10 @@ describe('chat stream boundary', () => {
       }),
     )
     expect(frames.at(-1)).toMatchObject({ type: 'stream_end', status: 'completed' })
-    expect(createAgent).toHaveBeenCalledWith({ memory: { store: memoryStore, savePolicy: 'turn' } })
+    expect(createAgent).toHaveBeenCalledWith({
+      memory: { store: memoryStore, savePolicy: 'turn' },
+      mcpServers: [],
+    })
     expect(vi.mocked(createAgent).mock.results[0].value.stream).toHaveBeenCalledWith({
       prompt: 'Hello',
       session: { sessionId: '00000000-0000-4000-8000-000000000001', userId: 'test' },

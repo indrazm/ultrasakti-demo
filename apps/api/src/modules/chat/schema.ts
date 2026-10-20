@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-export const chatRequestSchema = z
+const metadata = z.object({ sessionId: z.uuid() }).strict()
+
+const messagesRequest = z
   .object({
     type: z.literal('messages'),
     messages: z
@@ -13,6 +15,26 @@ export const chatRequestSchema = z
           .strict(),
       )
       .length(1),
-    metadata: z.object({ sessionId: z.uuid() }).strict(),
+    metadata,
   })
   .strict()
+
+const interactionResponseRequest = z
+  .object({
+    type: z.literal('interaction_response'),
+    interactionId: z.string().min(1).max(200),
+    response: z
+      .object({
+        type: z.literal('tool-approval'),
+        approved: z.boolean(),
+        reason: z.string().max(500).optional(),
+      })
+      .strict(),
+    metadata,
+  })
+  .strict()
+
+export const chatRequestSchema = z.discriminatedUnion('type', [
+  messagesRequest,
+  interactionResponseRequest,
+])

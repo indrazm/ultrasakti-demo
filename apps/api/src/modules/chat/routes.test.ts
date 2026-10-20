@@ -178,3 +178,69 @@ describe('chat session authorization', () => {
     expect(createAgent).not.toHaveBeenCalled()
   })
 })
+
+const post = (body: unknown) =>
+  app.request('/api/chat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+describe('chat tool approval', () => {
+  const sessionId = '00000000-0000-4000-8000-000000000001'
+  const continuation = { interaction: { id: 'approval-1', type: 'tool-approval' } }
+  const approval = (approved = true) => ({
+    type: 'interaction_response',
+    interactionId: 'approval-1',
+    response: { type: 'tool-approval', approved },
+    metadata: { sessionId },
+  })
+  const pause = async () => {
+    const resume = vi.fn(async () => ({ type: 'response', text: 'Done.', messages: [] }))
+    vi.mocked(createAgent).mockReturnValueOnce({
+      stream: vi.fn(async function* () {
+        yield { type: 'interaction', interaction: continuation.interaction, continuation }
+      }),
+    } as never)
+    await (await post(validRequest)).text()
+    vi.mocked(createAgent).mockReturnValueOnce({ resume } as never)
+    return resume
+  }
+
+  beforeEach(() => vi.clearAllMocks())
+
+  it('resumes a paused run once with the approval response', async () => {
+    const resume = await pause()
+
+    const response = await post(approval())
+    const body = await response.text()
+
+    expect(response.status).toBe(200)
+    expect(body).toContain('Done.')
+    expect(resume).toHaveBeenCalledWith(
+      continuation,
+      { type: 'tool-approval', approved: true },
+      { abortSignal: expect.any(AbortSignal) },
+    )
+
+    const replay = await (await post(approval())).text()
+    expect(replay).toContain('The assistant could not complete this response.')
+    expect(resume).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not let another user resolve the approval', async () => {
+    const resume = await pause()
+    vi.mocked(auth.api.getSession).mockResolvedValueOnce({ user: { id: 'intruder' } } as never)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const body = await (await post(approval())).text()
+
+    expect(body).toContain('The assistant could not complete this response.')
+    expect(resume).not.toHaveBeenCalled()
+  })
+
+  it('rejects approval responses with extra fields', async () => {
+    const response = await post({ ...approval(), messages: [] })
+    expect(response.status).toBe(400)
+  })
+})

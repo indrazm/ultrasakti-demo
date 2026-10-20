@@ -5,7 +5,14 @@ import { z } from 'zod'
 
 const serverName = z.string().regex(/^[a-z][a-z0-9-]*$/, 'Use lowercase letters, digits and dashes')
 
+// Tools not listed in `readOnlyTools` are treated as mutations and require approval, so tools a
+// server adds later stay gated until they are reviewed.
+const serverBase = {
+  readOnlyTools: z.array(z.string()).default([]),
+}
+
 const stdioServer = z.object({
+  ...serverBase,
   type: z.literal('stdio'),
   command: z.string().min(1),
   args: z.array(z.string()).optional(),
@@ -14,6 +21,7 @@ const stdioServer = z.object({
 })
 
 const httpServer = z.object({
+  ...serverBase,
   type: z.literal('http'),
   url: z.url(),
   headers: z.record(z.string(), z.string()).optional(),

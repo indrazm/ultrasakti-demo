@@ -3,6 +3,7 @@ import { ChatProvider, ComposerPrimitive, MessagePrimitive, ThreadPrimitive } fr
 import { ArrowUp, Asterisk, PanelLeft, Square } from 'lucide-react'
 import { Button } from '@ultrasakti/ui/components/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@ultrasakti/ui/components/sheet'
+import { ApprovalPrompt } from './approval-prompt'
 import { ChatSidebar } from './chat-sidebar'
 import { useSessionChat } from '../hooks/use-session-chat'
 import type { SessionNavigation } from '../types'
@@ -13,6 +14,17 @@ type ChatPageProps = SessionNavigation & {
   signOutPending: boolean
   signOutError: string
 }
+
+const markdownStyles = [
+  '[&_p]:my-3 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0',
+  '[&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6',
+  '[&_a]:text-[#c96442] [&_a]:underline',
+  '[&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-[#f0eee6] [&_pre]:p-3 [&_pre]:text-sm',
+  '[&_:not(pre)>code]:rounded [&_:not(pre)>code]:bg-[#f0eee6] [&_:not(pre)>code]:px-1 [&_:not(pre)>code]:text-sm',
+  '[&_table]:my-3 [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_table]:text-sm',
+  '[&_th]:border-b [&_th]:border-[#1f1e1d]/20 [&_th]:px-3 [&_th]:py-1.5 [&_th]:text-left',
+  '[&_td]:border-b [&_td]:border-[#1f1e1d]/10 [&_td]:px-3 [&_td]:py-1.5',
+].join(' ')
 
 const suggestions = [
   ['Make a plan', 'for a project I have in mind'],
@@ -146,7 +158,7 @@ export function ChatPage({
               autoScroll={chat.messages.length > 0}
               className={`px-4 lg:px-8 ${empty ? 'flex-none' : 'min-h-0 flex-1 overflow-y-auto py-6'}`}
             >
-              <div className="mx-auto w-full max-w-[720px]">
+              <div className="mx-auto w-full max-w-[960px]">
                 {empty && (
                   <div className="mb-8 flex items-center justify-center gap-3 text-center sm:mb-10">
                     <Asterisk size={40} strokeWidth={2.5} className="shrink-0 text-[#d97757]" />
@@ -166,11 +178,19 @@ export function ChatPage({
                           className={
                             message.role === 'user'
                               ? 'max-w-[80%] whitespace-pre-wrap rounded-2xl bg-[#f0eee6] px-4 py-2.5 text-base leading-6 text-[#141413]'
-                              : 'max-w-full whitespace-pre-wrap px-1 text-base leading-[1.7] text-[#141413]'
+                              : `${markdownStyles} max-w-full px-1 text-base leading-[1.7] text-[#141413]`
                           }
                         >
                           {message.role === 'assistant' && <p className="sr-only">Atelier</p>}
-                          <MessagePrimitive.Parts filter={(part) => part.type === 'text'} />
+                          {message.role === 'assistant' ? (
+                            <MessagePrimitive.Parts>
+                              {(part) =>
+                                part.type === 'text' ? <MessagePrimitive.Markdown /> : null
+                              }
+                            </MessagePrimitive.Parts>
+                          ) : (
+                            <MessagePrimitive.Parts filter={(part) => part.type === 'text'} />
+                          )}
                         </MessagePrimitive.Content>
                         {message.role === 'assistant' && (
                           <Asterisk
@@ -184,6 +204,20 @@ export function ChatPage({
                     )}
                   </ThreadPrimitive.Messages>
                 )}
+                {chat.interactions.pending.map(({ request }) =>
+                  request.type === 'tool-approval' ? (
+                    <ApprovalPrompt
+                      key={request.id}
+                      request={request}
+                      onRespond={(approved) =>
+                        void chat.respondToInteraction({
+                          interactionId: request.id,
+                          response: { type: 'tool-approval', approved },
+                        })
+                      }
+                    />
+                  ) : null,
+                )}
                 <ThreadPrimitive.Loading role="status" className="px-1 text-sm text-[#73726c]">
                   Atelier is thinking…
                 </ThreadPrimitive.Loading>
@@ -196,7 +230,7 @@ export function ChatPage({
               <ComposerPrimitive.Root
                 input={draft}
                 onInputChange={setDraft}
-                className="mx-auto max-w-[720px] rounded-[20px] border border-[#1f1e1d]/15 bg-white p-3 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-shadow focus-within:shadow-[0_6px_28px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.07)]"
+                className="mx-auto max-w-[960px] rounded-[20px] border border-[#1f1e1d]/15 bg-white p-3 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-shadow focus-within:shadow-[0_6px_28px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.07)]"
               >
                 <ComposerPrimitive.TextareaInput
                   aria-label="Message Atelier"
@@ -223,12 +257,12 @@ export function ChatPage({
                   )}
                 </div>
               </ComposerPrimitive.Root>
-              <p className="mx-auto mt-2 max-w-[720px] text-center text-xs text-[#73726c]">
+              <p className="mx-auto mt-2 max-w-[960px] text-center text-xs text-[#73726c]">
                 Conversations are saved to your account.
               </p>
             </div>
             {empty && (
-              <div className="mx-auto mt-4 flex max-w-[720px] flex-wrap justify-center gap-2 px-4">
+              <div className="mx-auto mt-4 flex max-w-[960px] flex-wrap justify-center gap-2 px-4">
                 {suggestions.map(([heading, detail]) => (
                   <button
                     key={heading}

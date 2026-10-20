@@ -146,6 +146,40 @@ describe('sessions API', () => {
     expect(memoryStore.load).toHaveBeenCalledWith({ scope: { sessionId, userId: 'owner' } })
   })
 
+  it('replays tool calls with their arguments but not their results', async () => {
+    vi.mocked(prisma.agentMemorySession.findFirst).mockResolvedValueOnce({ sessionId } as never)
+    vi.mocked(memoryStore.load).mockResolvedValueOnce([
+      { role: 'user', content: 'List orders' },
+      {
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 'call-1',
+            toolName: 'list_orders',
+            input: { status: 'draft' },
+          },
+        ],
+      },
+      {
+        role: 'tool',
+        content: [
+          {
+            type: 'tool-result',
+            toolCallId: 'call-1',
+            toolName: 'list_orders',
+            output: { type: 'text', value: 'SECRET-RESULT' },
+          },
+        ],
+      },
+      { role: 'assistant', content: 'Here they are' },
+    ] as never)
+    const body = await (await app.request(`/api/sessions/${sessionId}`)).text()
+    expect(body).toContain('list_orders')
+    expect(body).toContain('draft')
+    expect(body).not.toContain('SECRET-RESULT')
+  })
+
   it.each(['/api/sessions/not-a-uuid', '/api/sessions?offset=-1', '/api/sessions?offset=nope'])(
     'validates %s',
     async (path) => {

@@ -22,8 +22,11 @@ export const artifactMarkdownComponents: Components = {
       </a>
     )
   },
+  // Only the user's own artifacts render as images. Model output can carry untrusted data from
+  // tools, and an arbitrary image URL would let it send that data to another host.
   img: ({ node: _node, src, alt, ...props }) => {
-    const url = typeof src === 'string' ? resolveArtifactUrl(src) : src
+    const url = typeof src === 'string' ? resolveArtifactUrl(src) : undefined
+    if (!url || url === src) return <span>{alt}</span>
     return <img {...props} src={url} alt={alt ?? ''} className="my-3 max-w-full rounded-lg" />
   },
 }

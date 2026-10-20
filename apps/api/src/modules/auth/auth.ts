@@ -19,6 +19,7 @@ if (!secret || secret.length < 32) {
 export const auth = betterAuth({
   baseURL,
   secret,
+  advanced: { cookiePrefix: 'ultrasakti' },
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
   emailAndPassword: { enabled: true },
   trustedOrigins: [platformOrigin],

@@ -1,6 +1,6 @@
 # 0016: GitHub Actions CI and Deployment
 
-**Status:** Accepted
+**Status:** Superseded by [0017](./0017-pm2-runtime-deployment.md)
 **Date:** 2026-10-16
 **Supersedes:** None
 

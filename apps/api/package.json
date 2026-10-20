@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
-    "dev": "pnpm --filter @ultrasakti/db generate && pnpm with-env tsx watch src/index.ts",
+    "dev": "pnpm --filter @ultrasakti/db generate && pnpm with-env tsx watch src/server.ts",
     "build": "pnpm --filter @ultrasakti/db generate && tsc --noEmit",
     "typecheck": "pnpm --filter @ultrasakti/db generate && tsc --noEmit",
     "test": "vitest run",

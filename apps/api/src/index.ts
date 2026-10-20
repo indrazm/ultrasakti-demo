@@ -1,6 +1,4 @@
-import { serve } from '@hono/node-server'
 import { zValidator } from '@hono/zod-validator'
-import { closeRuntimeObservability } from '@ultrasakti/runtime'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { z } from 'zod'
@@ -9,6 +7,12 @@ import { chatRoutes } from './modules/chat/routes'
 import { sessionsRoutes } from './modules/sessions/routes'
 
 export const app = new Hono()
+
+app.use('*', async (c, next) => {
+  c.header('X-Content-Type-Options', 'nosniff')
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin')
+  await next()
+})
 
 app.use('/api/auth/*', cors({ origin: platformOrigin, credentials: true }))
 app.all('/api/auth/*', (c) => auth.handler(c.req.raw))
@@ -29,33 +33,3 @@ app.get('/api/health', (c) => c.json({ status: 'ok' }))
 app.post('/api/echo', zValidator('json', z.object({ message: z.string().min(1) })), (c) =>
   c.json({ message: c.req.valid('json').message }),
 )
-
-if (!process.env.VITEST) {
-  const port = Number(process.env.PORT ?? 3000)
-  const server = serve({ fetch: app.fetch, port }, (info) => {
-    console.log(`API listening on http://localhost:${info.port}`)
-  })
-
-  let shuttingDown = false
-  const shutdown = () => {
-    if (shuttingDown) return
-    shuttingDown = true
-    const timeout = setTimeout(() => {
-      console.error('API shutdown timed out')
-      process.exit(1)
-    }, 30_000)
-    server.close(async (error) => {
-      try {
-        await closeRuntimeObservability()
-        process.exit(error ? 1 : 0)
-      } catch {
-        console.error('Failed to close runtime observability')
-        process.exit(1)
-      } finally {
-        clearTimeout(timeout)
-      }
-    })
-  }
-  process.once('SIGINT', shutdown)
-  process.once('SIGTERM', shutdown)
-}

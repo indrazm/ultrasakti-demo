@@ -31,7 +31,7 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ultrasakti_ci
-      VITE_API_URL: https://app.tail9a7b40.ts.net
+      VITE_API_URL: https://ubuntu-wsl.tail9a7b40.ts.net
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -54,20 +54,31 @@ jobs:
         run: pnpm test
       - name: Build
         run: pnpm build
+      - name: Check production runtime
+        run: pnpm check:runtime
+      - name: Check deployment scripts
+        run: bash -n deploy/deploy.sh deploy/ssh-command.sh deploy/install-pm2-service.sh
 
   deploy:
-    name: Deploy to app
+    name: Deploy with PM2
     needs: ci
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     environment:
       name: production
-      url: https://app.tail9a7b40.ts.net
+      url: https://ubuntu-wsl.tail9a7b40.ts.net
     concurrency:
       group: deploy-production
       cancel-in-progress: false
     steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4.2.0
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          ping: ${{ vars.DEPLOY_HOST }}
       - name: Deploy the checked commit
         env:
           DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}

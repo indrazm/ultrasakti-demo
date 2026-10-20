@@ -9,7 +9,7 @@ apps/
 └── platform/  # React platform application
 packages/
 ├── db/        # Prisma 7 database package
-├── runtime/   # shared runtime package placeholder
+├── runtime/   # agent runtime: MCP servers and sandbox tools
 └── ui/        # shared shadcn/ui components
 ```
 

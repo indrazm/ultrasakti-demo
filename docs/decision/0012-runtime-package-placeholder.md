@@ -1,6 +1,6 @@
 # 0012: Runtime Package Placeholder
 
-**Status:** Accepted
+**Status:** Superseded by [0018](./0018-runtime-mcp-and-sandbox.md)
 **Date:** 2026-09-29
 **Supersedes:** None
 

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "eval:basic": "node --env-file=../../.env src/evals/run-basics.ts"
+    "eval:basic": "node --env-file=../../.env src/evals/run-basics.ts",
+    "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@anvia/core": "^1.17.0",

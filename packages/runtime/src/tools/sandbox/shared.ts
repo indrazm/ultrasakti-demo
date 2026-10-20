@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { DockerSandboxClient, DockerSandboxError, type DockerSandbox } from '@anvia/sandbox'
 import { ARTIFACTS_DIR, createSandboxTools, sandboxInstructions } from './index.ts'
+import { createLargeOutputGate } from './output-gate.ts'
 
 const WORKDIR = '/workspace'
 const MAX_ARTIFACT_BYTES = 20 * 1024 * 1024
@@ -93,6 +94,7 @@ export async function getSandboxToolset(userId: string, sessionId: string) {
     return {
       tools: createSandboxTools(sandbox.runtime),
       instructions: sandboxInstructions(sessionId),
+      middlewares: [createLargeOutputGate(sandbox.runtime, sessionId)],
     }
   } catch (error) {
     console.error(

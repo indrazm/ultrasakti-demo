@@ -10,6 +10,7 @@ vi.mock('@hono/node-server', () => ({ serve: () => ({ close: closeServer }) }))
 vi.mock('@ultrasakti/runtime', () => ({
   closeRuntimeObservability: closeObservability,
   closeMcpConnection: vi.fn().mockResolvedValue(undefined),
+  closeSandboxes: vi.fn().mockResolvedValue(undefined),
 }))
 vi.mock('@ultrasakti/db', () => ({ prisma: { $disconnect: disconnectDatabase } }))
 vi.mock('./modules/auth/auth', () => ({

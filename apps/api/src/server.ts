@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
 import { prisma } from '@ultrasakti/db'
-import { closeMcpConnection, closeRuntimeObservability } from '@ultrasakti/runtime'
+import { closeMcpConnection, closeRuntimeObservability, closeSandboxes } from '@ultrasakti/runtime'
 import { app } from './index'
 import { createWebRoutes } from './modules/web/routes'
 
@@ -31,7 +31,12 @@ const shutdown = () => {
   }, 30_000)
   server.close(async (error) => {
     try {
-      await Promise.all([closeMcpConnection(), closeRuntimeObservability(), prisma.$disconnect()])
+      await Promise.all([
+        closeMcpConnection(),
+        closeSandboxes(),
+        closeRuntimeObservability(),
+        prisma.$disconnect(),
+      ])
       process.exit(error ? 1 : 0)
     } catch {
       console.error('Failed to close runtime observability')

@@ -359,27 +359,27 @@ importers:
   packages/db:
     dependencies:
       '@anvia/core':
-        specifier: 1.5.0
-        version: 1.5.0(zod@4.6.5)
+        specifier: 1.14.1
+        version: 1.14.1(zod@4.6.7)
       '@anvia/memory-prisma':
         specifier: 1.2.1
-        version: 1.2.1(@anvia/core@1.5.0(zod@4.6.5))(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))
+        version: 1.2.1(@anvia/core@1.14.1(zod@4.6.7))(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2))(typescript@7.0.2))
       '@prisma/adapter-pg':
         specifier: ^7.0.0
         version: 7.10.0
       '@prisma/client':
         specifier: ^7.0.0
-        version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+        version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2))(typescript@7.0.2)
       pg:
         specifier: ^8.0.0
         version: 8.23.0
     devDependencies:
       '@types/node':
         specifier: latest
-        version: 26.6.3
+        version: 26.6.5
       prisma:
         specifier: ^7.0.0
-        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
       typescript:
         specifier: latest
         version: 7.0.2
@@ -387,17 +387,20 @@ importers:
   packages/runtime:
     dependencies:
       '@anvia/core':
-        specifier: ^1.5.0
-        version: 1.5.0(zod@4.6.5)
+        specifier: ^1.17.0
+        version: 1.17.0(zod@4.6.5)
       '@anvia/lens':
         specifier: ^1.2.0
-        version: 1.2.0(@anvia/core@1.5.0(zod@4.6.5))(@opentelemetry/api@1.9.1)
+        version: 1.2.0(@anvia/core@1.17.0(zod@4.6.5))(@opentelemetry/api@1.9.1)
       '@anvia/mcp':
         specifier: ^1.2.5
-        version: 1.2.5(@anvia/core@1.5.0(zod@4.6.5))
+        version: 1.2.5(@anvia/core@1.17.0(zod@4.6.5))
       '@anvia/openai':
         specifier: ^1.1.7
-        version: 1.1.7(@anvia/core@1.5.0(zod@4.6.5))(undici@8.11.2)(zod@4.6.5)
+        version: 1.1.7(@anvia/core@1.17.0(zod@4.6.5))(undici@8.11.2)(zod@4.6.5)
+      '@anvia/sandbox':
+        specifier: ^1.2.1
+        version: 1.2.1(@anvia/core@1.17.0(zod@4.6.5))
       exa-js:
         specifier: ^2.23.0
         version: 2.23.0
@@ -483,6 +486,24 @@ packages:
     peerDependencies:
       '@anvia/core': ^1.2.1
 
+  '@anvia/core@1.14.1':
+    resolution: {integrity: sha512-6TRpoy+BP3vc6Yk3Mp01BBjLp83pbiCG/1PI/0dzZruO98LmF9nmi6hFljlZDmiNENQo6vVU6e2NJbZY/AdNQA==}
+    peerDependencies:
+      '@valibot/to-json-schema': ^1.8.0
+      zod: ^4.6.5
+    peerDependenciesMeta:
+      '@valibot/to-json-schema':
+        optional: true
+
+  '@anvia/core@1.17.0':
+    resolution: {integrity: sha512-N9K7ay1WedLIFYVRkAeiGKI0UNXE7px7mOllpLCGyeijYzqliOAHkJDJDoAgmtRkFzJz2h/1DghpTVbigXfZiQ==}
+    peerDependencies:
+      '@valibot/to-json-schema': ^1.8.0
+      zod: ^4.6.5
+    peerDependenciesMeta:
+      '@valibot/to-json-schema':
+        optional: true
+
   '@anvia/core@1.5.0':
     resolution: {integrity: sha512-oGhutUnp9DbOWwAiTih5fJgOUbdXaITHE83sNsc1m+PWo2im8Rzs1W68CSJy1LfFTlSye7AWOsnuZDMnijwUyg==}
     peerDependencies:
@@ -549,6 +570,13 @@ packages:
     peerDependenciesMeta:
       '@anvia/graph':
         optional: true
+
+  '@anvia/sandbox@1.2.1':
+    resolution: {integrity: sha512-CQ9x8QCwSdN4ErIWqFZU6DHDfMYY60jLhfIbUF3FKOc1Lmg9JWmp85ebWz90FE6dnQY/YJNeTm5wT25usVvhYQ==}
+    engines: {node: '>=20.12.0'}
+    hasBin: true
+    peerDependencies:
+      '@anvia/core': ^1.14.1
 
   '@anvia/server@1.1.4':
     resolution: {integrity: sha512-iGzAhUp5jrLEcnX1tzRuso0RMW2kojczd23ur3d411ZLDkBZnMEWgqxCRxgNa9zjlwP47m3Vjrv1e5TAMewXVQ==}
@@ -805,6 +833,14 @@ packages:
   '@bramus/specificity@2.4.2':
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
+
+  '@clack/core@1.5.1':
+    resolution: {integrity: sha512-iHTrHA8MtVuLl2TfZySmcKv1qO2PoyC9Z7pfSDozEuV5vtY3/wcOPKJXlqJ5Oq2Cx5DDGQGAMVx6HZfRRoVEbQ==}
+    engines: {node: '>= 20.12.0'}
+
+  '@clack/prompts@1.8.1':
+    resolution: {integrity: sha512-dlT1m5e/0yUL0kRNcQn7yGLVThkgbB0Ga/1AmfDDC/8ik6AIiSf2QLQO2zPYvefsHP0aFgxO93cVLCCfDp7kzQ==}
+    engines: {node: '>= 20.12.0'}
 
   '@csstools/color-helpers@6.1.2':
     resolution: {integrity: sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==}
@@ -2241,6 +2277,9 @@ packages:
   '@types/node@26.6.3':
     resolution: {integrity: sha512-dsqMQQoeTLqu9wynDD00q573mNzso3IdQOAfHRJqLCcmCFPoGo9A1bDpUcv/9tnKpErQWv9uKeGfl37EIS02Yg==}
 
+  '@types/node@26.6.5':
+    resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
+
   '@types/pg@8.23.1':
     resolution: {integrity: sha512-fKVHpikPdg4GKks3JuLEhvwSyvwzF23hnabPy6DD8ljVbC7+6J5dQzdv4arV6jqq57djnMgs1HKBxX4P8aBI3A==}
 
@@ -3168,8 +3207,17 @@ packages:
   fast-querystring@1.1.2:
     resolution: {integrity: sha512-g6KuKWmFXc0fID8WWH0jit4g0AGBoJhCkJMb1RmbsSEUNvQ+ZC8D6CUZ+GtF8nMzSPXnhiePyyqqipzNNEnHjg==}
 
+  fast-string-truncated-width@3.0.3:
+    resolution: {integrity: sha512-0jjjIEL6+0jag3l2XWWizO64/aZVtpiGE3t0Zgqxv0DPuxiMjvB3M24fCyhZUO4KomJQPj3LTSUnDP3GpdwC0g==}
+
+  fast-string-width@3.0.2:
+    resolution: {integrity: sha512-gX8LrtNEI5hq8DVUfRQMbr5lpaS4nMIWV+7XEbXk2b8kiQIizgnlr12B4dA3ZEx3308ze0O4Q1R+cHts8kyUJg==}
+
   fast-uri@3.1.8:
     resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==}
+
+  fast-wrap-ansi@0.2.2:
+    resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
 
   fastq@1.20.3:
     resolution: {integrity: sha512-XKv5nnLs6nLF71NgiKJLIZFLkPyIEuOselLG7ujZnGrRfQK8HpvY+WqKhAJUAdLomwVHErVS4LfxFlPq0/FTAw==}
@@ -4380,6 +4428,11 @@ packages:
     peerDependencies:
       react: ^19.3.0
 
+  react-dom@19.3.1:
+    resolution: {integrity: sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==}
+    peerDependencies:
+      react: ^19.3.1
+
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
 
@@ -4442,6 +4495,10 @@ packages:
 
   react@19.3.0:
     resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
+    engines: {node: '>=0.10.0'}
+
+  react@19.3.1:
+    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
     engines: {node: '>=0.10.0'}
 
   readdirp@5.1.1:
@@ -5123,6 +5180,9 @@ packages:
   zod@4.6.5:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -5134,15 +5194,25 @@ snapshots:
     dependencies:
       '@anvia/core': 1.5.0(zod@4.6.5)
 
+  '@anvia/core@1.14.1(zod@4.6.7)':
+    dependencies:
+      yaml: 2.9.1
+      zod: 4.6.7
+
+  '@anvia/core@1.17.0(zod@4.6.5)':
+    dependencies:
+      yaml: 2.9.1
+      zod: 4.6.5
+
   '@anvia/core@1.5.0(zod@4.6.5)':
     dependencies:
       yaml: 2.9.1
       zod: 4.6.5
 
-  '@anvia/lens@1.2.0(@anvia/core@1.5.0(zod@4.6.5))(@opentelemetry/api@1.9.1)':
+  '@anvia/lens@1.2.0(@anvia/core@1.17.0(zod@4.6.5))(@opentelemetry/api@1.9.1)':
     dependencies:
-      '@anvia/core': 1.5.0(zod@4.6.5)
-      '@anvia/otel': 1.2.0(@anvia/core@1.5.0(zod@4.6.5))
+      '@anvia/core': 1.17.0(zod@4.6.5)
+      '@anvia/otel': 1.2.0(@anvia/core@1.17.0(zod@4.6.5))
       '@opentelemetry/exporter-logs-otlp-http': 0.222.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.11.0(@opentelemetry/api@1.9.1)
@@ -5152,21 +5222,21 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@anvia/mcp@1.2.5(@anvia/core@1.5.0(zod@4.6.5))':
+  '@anvia/mcp@1.2.5(@anvia/core@1.17.0(zod@4.6.5))':
     dependencies:
-      '@anvia/core': 1.5.0(zod@4.6.5)
+      '@anvia/core': 1.17.0(zod@4.6.5)
       '@modelcontextprotocol/client': 2.3.1
       undici: 8.12.2
 
-  '@anvia/memory-prisma@1.2.1(@anvia/core@1.5.0(zod@4.6.5))(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))':
+  '@anvia/memory-prisma@1.2.1(@anvia/core@1.14.1(zod@4.6.7))(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2))(typescript@7.0.2))':
     dependencies:
-      '@anvia/core': 1.5.0(zod@4.6.5)
+      '@anvia/core': 1.14.1(zod@4.6.7)
     optionalDependencies:
-      '@prisma/client': 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+      '@prisma/client': 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2))(typescript@7.0.2)
 
-  '@anvia/openai@1.1.7(@anvia/core@1.5.0(zod@4.6.5))(undici@8.11.2)(zod@4.6.5)':
+  '@anvia/openai@1.1.7(@anvia/core@1.17.0(zod@4.6.5))(undici@8.11.2)(zod@4.6.5)':
     dependencies:
-      '@anvia/core': 1.5.0(zod@4.6.5)
+      '@anvia/core': 1.17.0(zod@4.6.5)
       openai: 7.23.0(undici@8.11.2)(zod@4.6.5)
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -5176,9 +5246,9 @@ snapshots:
       - ws
       - zod
 
-  '@anvia/otel@1.2.0(@anvia/core@1.5.0(zod@4.6.5))':
+  '@anvia/otel@1.2.0(@anvia/core@1.17.0(zod@4.6.5))':
     dependencies:
-      '@anvia/core': 1.5.0(zod@4.6.5)
+      '@anvia/core': 1.17.0(zod@4.6.5)
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.222.0
 
@@ -5214,6 +5284,12 @@ snapshots:
       '@anvia/client': 1.2.0(@anvia/core@1.5.0(zod@4.6.5))
       '@anvia/core': 1.5.0(zod@4.6.5)
       react: 19.3.0
+
+  '@anvia/sandbox@1.2.1(@anvia/core@1.17.0(zod@4.6.5))':
+    dependencies:
+      '@anvia/core': 1.17.0(zod@4.6.5)
+      '@clack/prompts': 1.8.1
+      zod: 4.6.5
 
   '@anvia/server@1.1.4(@anvia/client@1.2.0(@anvia/core@1.5.0(zod@4.6.5)))':
     dependencies:
@@ -5510,6 +5586,18 @@ snapshots:
   '@bramus/specificity@2.4.2':
     dependencies:
       css-tree: 3.2.1
+
+  '@clack/core@1.5.1':
+    dependencies:
+      fast-wrap-ansi: 0.2.2
+      sisteransi: 1.0.5
+
+  '@clack/prompts@1.8.1':
+    dependencies:
+      '@clack/core': 1.5.1
+      fast-string-width: 3.0.2
+      fast-wrap-ansi: 0.2.2
+      sisteransi: 1.0.5
 
   '@csstools/color-helpers@6.1.2': {}
 
@@ -5976,6 +6064,13 @@ snapshots:
       typescript: 7.0.2
     optional: true
 
+  '@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2))(typescript@7.0.2)':
+    dependencies:
+      '@prisma/client-runtime-utils': 7.10.0
+    optionalDependencies:
+      prisma: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
+      typescript: 7.0.2
+
   '@prisma/config@7.10.0':
     dependencies:
       c12: 3.3.4
@@ -6065,6 +6160,25 @@ snapshots:
       - '@types/react-dom'
     optional: true
 
+  '@prisma/studio-core@0.33.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@radix-ui/react-toggle': 1.1.10(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@types/react': 19.3.0
+      '@visx/curve': 4.0.1-alpha.0
+      '@visx/event': 4.0.1-alpha.0
+      '@visx/grid': 4.0.1-alpha.0(react@19.3.1)
+      '@visx/group': 4.0.1-alpha.0(react@19.3.1)
+      '@visx/responsive': 4.0.1-alpha.0(react@19.3.1)
+      '@visx/scale': 4.0.1-alpha.0
+      '@visx/shape': 4.0.1-alpha.0(react@19.3.1)
+      d3-array: 3.2.4
+      d3-shape: 3.2.0
+      elkjs: 0.11.1
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+    transitivePeerDependencies:
+      - '@types/react-dom'
+
   '@radix-ui/primitive@1.1.3': {}
 
   '@radix-ui/primitive@1.1.7': {}
@@ -6075,6 +6189,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
     optional: true
+
+  '@radix-ui/react-compose-refs@1.1.2(@types/react@19.3.0)(react@19.3.1)':
+    dependencies:
+      react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-compose-refs@1.1.5(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
@@ -6186,6 +6306,15 @@ snapshots:
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
     optional: true
 
+  '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@radix-ui/react-slot': 1.2.3(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.3.0(@types/react@19.3.0)
+
   '@radix-ui/react-slot@1.2.3(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.3.0)(react@19.3.0)
@@ -6193,6 +6322,13 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
     optional: true
+
+  '@radix-ui/react-slot@1.2.3(@types/react@19.3.0)(react@19.3.1)':
+    dependencies:
+      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-slot@1.3.3(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
@@ -6213,6 +6349,17 @@ snapshots:
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
     optional: true
 
+  '@radix-ui/react-toggle@1.1.10(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.3
+      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.3.0(@types/react@19.3.0)
+
   '@radix-ui/react-use-callback-ref@1.1.4(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
       react: 19.3.0
@@ -6227,6 +6374,14 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
     optional: true
+
+  '@radix-ui/react-use-controllable-state@1.2.2(@types/react@19.3.0)(react@19.3.1)':
+    dependencies:
+      '@radix-ui/react-use-effect-event': 0.0.2(@types/react@19.3.0)(react@19.3.1)
+      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-controllable-state@1.2.6(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
@@ -6245,6 +6400,13 @@ snapshots:
       '@types/react': 19.3.0
     optional: true
 
+  '@radix-ui/react-use-effect-event@0.0.2(@types/react@19.3.0)(react@19.3.1)':
+    dependencies:
+      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   '@radix-ui/react-use-effect-event@0.0.5(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
       '@radix-ui/react-use-layout-effect': 1.1.4(@types/react@19.3.0)(react@19.3.0)
@@ -6258,6 +6420,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
     optional: true
+
+  '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.3.0)(react@19.3.1)':
+    dependencies:
+      react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-layout-effect@1.1.4(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
@@ -6750,6 +6918,10 @@ snapshots:
     dependencies:
       undici-types: 8.9.0
 
+  '@types/node@26.6.5':
+    dependencies:
+      undici-types: 8.9.0
+
   '@types/pg@8.23.1':
     dependencies:
       '@types/node': 26.6.3
@@ -6855,12 +7027,29 @@ snapshots:
       react: 19.3.0
     optional: true
 
+  '@visx/grid@4.0.1-alpha.0(react@19.3.1)':
+    dependencies:
+      '@types/react': 19.3.0
+      '@visx/curve': 4.0.1-alpha.0
+      '@visx/group': 4.0.1-alpha.0(react@19.3.1)
+      '@visx/point': 4.0.1-alpha.0
+      '@visx/scale': 4.0.1-alpha.0
+      '@visx/shape': 4.0.1-alpha.0(react@19.3.1)
+      classnames: 2.5.1
+      react: 19.3.1
+
   '@visx/group@4.0.1-alpha.0(react@19.3.0)':
     dependencies:
       '@types/react': 19.3.0
       classnames: 2.5.1
       react: 19.3.0
     optional: true
+
+  '@visx/group@4.0.1-alpha.0(react@19.3.1)':
+    dependencies:
+      '@types/react': 19.3.0
+      classnames: 2.5.1
+      react: 19.3.1
 
   '@visx/point@4.0.1-alpha.0': {}
 
@@ -6871,6 +7060,13 @@ snapshots:
       lodash: 4.18.1
       react: 19.3.0
     optional: true
+
+  '@visx/responsive@4.0.1-alpha.0(react@19.3.1)':
+    dependencies:
+      '@types/lodash': 4.17.25
+      '@types/react': 19.3.0
+      lodash: 4.18.1
+      react: 19.3.1
 
   '@visx/scale@4.0.1-alpha.0':
     dependencies:
@@ -6888,6 +7084,18 @@ snapshots:
       lodash: 4.18.1
       react: 19.3.0
     optional: true
+
+  '@visx/shape@4.0.1-alpha.0(react@19.3.1)':
+    dependencies:
+      '@types/lodash': 4.17.25
+      '@types/react': 19.3.0
+      '@visx/curve': 4.0.1-alpha.0
+      '@visx/group': 4.0.1-alpha.0(react@19.3.1)
+      '@visx/scale': 4.0.1-alpha.0
+      '@visx/vendor': 4.0.0-alpha.0
+      classnames: 2.5.1
+      lodash: 4.18.1
+      react: 19.3.1
 
   '@visx/vendor@4.0.0-alpha.0':
     dependencies:
@@ -7616,7 +7824,17 @@ snapshots:
     dependencies:
       fast-decode-uri-component: 1.0.1
 
+  fast-string-truncated-width@3.0.3: {}
+
+  fast-string-width@3.0.2:
+    dependencies:
+      fast-string-truncated-width: 3.0.3
+
   fast-uri@3.1.8: {}
+
+  fast-wrap-ansi@0.2.2:
+    dependencies:
+      fast-string-width: 3.0.2
 
   fastq@1.20.3:
     dependencies:
@@ -8797,6 +9015,23 @@ snapshots:
       - react-dom
     optional: true
 
+  prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2):
+    dependencies:
+      '@prisma/config': 7.10.0
+      '@prisma/dev': 0.24.17(typescript@7.0.2)
+      '@prisma/engines': 7.10.0
+      '@prisma/studio-core': 0.33.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      mysql2: 3.15.3
+      postgres: 3.4.7
+    optionalDependencies:
+      typescript: 7.0.2
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+      - magicast
+      - react
+      - react-dom
+
   prompts@2.4.2:
     dependencies:
       kleur: 3.0.3
@@ -8927,6 +9162,11 @@ snapshots:
       react: 19.3.0
       scheduler: 0.28.0
 
+  react-dom@19.3.1(react@19.3.1):
+    dependencies:
+      react: 19.3.1
+      scheduler: 0.28.0
+
   react-is@17.0.2: {}
 
   react-is@19.3.0: {}
@@ -8991,6 +9231,8 @@ snapshots:
       '@types/react': 19.3.0
 
   react@19.3.0: {}
+
+  react@19.3.1: {}
 
   readdirp@5.1.1: {}
 
@@ -9699,5 +9941,7 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.6.5: {}
+
+  zod@4.6.7: {}
 
   zwitch@2.0.4: {}

@@ -5,34 +5,6 @@
 export default {
   mcp: {
     servers: {
-      'ultra-sakti': {
-        type: 'stdio',
-        command: 'npx',
-        args: ['mcp-remote', 'https://ubuntu-wsl.tail9a7b40.ts.net:3443/mcp'],
-        readOnlyTools: [
-          'dashboard_summary',
-          'list_products',
-          'get_product',
-          'list_warehouses',
-          'list_suppliers',
-          'check_stock',
-          'expiring_stock',
-        ],
-      },
-      'ultra-sakti-sales': {
-        type: 'stdio',
-        command: 'npx',
-        args: ['mcp-remote', 'https://ubuntu-wsl.tail9a7b40.ts.net:4443/mcp'],
-        readOnlyTools: [
-          'sales_summary',
-          'sales_leaderboard',
-          'list_orders',
-          'get_order',
-          'list_invoices',
-          'list_customers',
-          'list_products',
-        ],
-      },
       // docs: {
       //   type: 'http',
       //   url: 'https://mcp.example.com/mcp',

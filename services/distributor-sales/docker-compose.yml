@@ -1,0 +1,14 @@
+services:
+  sales:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      DATABASE_PATH: /data/sales.db
+    volumes:
+      - sales-data:/data
+    restart: unless-stopped
+
+volumes:
+  sales-data:

@@ -1,0 +1,14 @@
+services:
+  warehouse:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_PATH: /data/warehouse.db
+    volumes:
+      - warehouse-data:/data
+    restart: unless-stopped
+
+volumes:
+  warehouse-data:
